@@ -210,7 +210,7 @@ export default function Home() {
   const [screen, setScreen] = useState<Screen>("intro");
   const [warningCountdown, setWarningCountdown] = useState(5);
   const [loadingPct, setLoadingPct] = useState(0);
-  const [loadingMsg, setLoadingMsg] = useState(LOADING_MESSAGES[0]);
+  const [loadingMsg, setLoadingMsg] = useState<(typeof LOADING_MESSAGES)[number]>(LOADING_MESSAGES[0]);
   const [loadingFinal, setLoadingFinal] = useState(false);
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
   const [copyMsg, setCopyMsg] = useState("");
