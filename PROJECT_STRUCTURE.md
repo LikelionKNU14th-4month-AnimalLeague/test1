@@ -8,7 +8,7 @@
 | 언어 | TypeScript | 5.x |
 | UI 라이브러리 | React | 19.x |
 | 스타일링 | Tailwind CSS | 4.x |
-| 패키지 매니저 | pnpm | 10 |
+| 패키지 매니저 | pnpm | 10.28.2 |
 
 ---
 
@@ -139,6 +139,7 @@ studySpecial
 - `next`, `react`, `react-dom`
 - `typescript`
 - `tailwindcss`, `@tailwindcss/postcss`
+- `packageManager: pnpm@10.28.2`
 - 실행 스크립트
 
 주요 스크립트:
