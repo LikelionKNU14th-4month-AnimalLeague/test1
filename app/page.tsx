@@ -13,6 +13,8 @@ type Question<T extends string = ResultType | SpecialType> = {
   types: [T, T];
 };
 
+type QuizQuestion = Question<ResultType>;
+
 type ResultEntry = {
   code: string;
   name: string;
@@ -44,10 +46,10 @@ const LOADING_MESSAGES = [
   "곧 끝납니다. 이 말은 세 번째 쓰는 중입니다.",
 ] as const;
 
-const QUESTIONS: Record<Exclude<Category, "study">, Question[]> & {
+const QUESTIONS: Record<Exclude<Category, "study">, QuizQuestion[]> & {
   study: {
     special: Question<SpecialType>;
-    regular: Question[];
+    regular: QuizQuestion[];
   };
 } = {
   love: [
@@ -201,7 +203,7 @@ export default function Home() {
   const [school, setSchool] = useState("");
   const [nickname, setNickname] = useState("");
   const [category, setCategory] = useState<Category | null>(null);
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [qIndex, setQIndex] = useState(0);
   const [answers, setAnswers] = useState<ResultType[]>([]);
   const [elapsed, setElapsed] = useState(0);
