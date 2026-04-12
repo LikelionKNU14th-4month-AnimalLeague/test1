@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>시험기간 도파민 테스트</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #ccc8bc;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 16px 80px;
+      font-family: 'Nanum Gothic', sans-serif;
+    }
+
+    #paper {
+      background: #fff;
+      width: 100%;
+      max-width: 780px;
+      min-height: 1020px;
+      box-shadow: 2px 4px 20px rgba(0,0,0,0.3);
+      padding: 28px 44px 70px;
+      position: relative;
+    }
+
+    /* ── Paper header ── */
+    .paper-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+    .paper-meta { font-size: 11.5px; color: #111; }
+    .paper-big-num { font-size: 54px; font-weight: 800; line-height: 1; }
+    .div1 { border: none; border-top: 2px solid #000; margin: 4px 0; }
+    .div2 { border: none; border-top: 4px double #000; margin: 4px 0 22px; }
+    .paper-subject-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+    }
+    .paper-subject { font-size: 26px; font-weight: 800; letter-spacing: 4px; }
+    .paper-badge {
+      border: 2px solid #000;
+      border-radius: 20px;
+      padding: 4px 18px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    /* ── Info box ── */
+    .info-box {
+      border: 1.5px solid #000;
+      padding: 14px 18px;
+      margin-bottom: 26px;
+    }
+    .info-box-title { font-size: 14.5px; font-weight: 800; margin-bottom: 10px; }
+    .info-box-body { font-size: 12.5px; line-height: 1.9; color: #111; }
+    .info-box-warn { color: #cc0000; font-size: 12.5px; margin-top: 10px; font-weight: 700; }
+
+    /* ── Input questions ── */
+    .q-item { margin-bottom: 22px; }
+    .q-label { font-size: 15px; font-weight: 700; margin-bottom: 8px; display: flex; gap: 10px; }
+    .q-num { font-weight: 800; }
+    .q-input {
+      width: 100%;
+      border: 1.5px solid #000;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-family: 'Nanum Gothic', sans-serif;
+      outline: none;
+    }
+    .q-input::placeholder { color: #bbb; }
+
+    /* ── Buttons ── */
+    .btn-next {
+      display: block;
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 15px 52px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin: 36px auto 0;
+      font-family: 'Nanum Gothic', sans-serif;
+      letter-spacing: 1px;
+    }
+    .btn-next:hover { background: #333; }
+
+    /* ── Footer ── */
+    .paper-footer {
+      position: absolute;
+      bottom: 20px;
+      left: 44px;
+      right: 44px;
+      border-top: 1px solid #000;
+      padding-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #222;
+    }
+
+    /* ── Category ── */
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 4px;
+    }
+    .category-btn {
+      border: 2px solid #000;
+      background: #fff;
+      padding: 36px 16px;
+      text-align: center;
+      cursor: pointer;
+      font-family: 'Nanum Gothic', sans-serif;
+      transition: background 0.15s, color 0.15s;
+    }
+    .category-btn:hover { background: #000; color: #fff; }
+    .cat-circle { font-size: 22px; margin-bottom: 12px; }
+    .cat-name { font-size: 24px; font-weight: 800; }
+    .cat-desc { font-size: 11.5px; margin-top: 8px; opacity: 0.65; }
+
+    /* ── Question screen ── */
+    .q-meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+    .progress-bar { height: 5px; background: #ddd; margin-bottom: 14px; }
+    .progress-bar-inner { height: 100%; background: #000; transition: width 0.3s; }
+    .stolen-time {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #cc0000;
+      border: 1px dashed #cc0000;
+      padding: 6px;
+      margin-bottom: 18px;
+    }
+    .question-box {
+      border: 1.5px solid #000;
+      padding: 18px 22px;
+      margin-bottom: 20px;
+    }
+    .question-num-label { font-size: 12px; color: #777; margin-bottom: 8px; }
+    .question-text { font-size: 17px; font-weight: 700; line-height: 1.65; }
+    .choices-list { display: flex; flex-direction: column; gap: 10px; }
+    .choice-btn {
+      border: 1.5px solid #000;
+      background: #fff;
+      padding: 14px 18px;
+      text-align: left;
+      cursor: pointer;
+      font-family: 'Nanum Gothic', sans-serif;
+      font-size: 14.5px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .choice-btn:hover { background: #000; color: #fff; }
+    .choice-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .choice-sym { font-weight: 800; font-size: 16px; flex-shrink: 0; }
+
+    /* ── Loading screen ── */
+    .loading-wrap { padding: 60px 20px; text-align: center; }
+    .loading-subtitle { font-size: 12px; color: #888; margin-bottom: 36px; letter-spacing: 1px; }
+    .loading-pct { font-size: 84px; font-weight: 800; line-height: 1; margin-bottom: 14px; }
+    .loading-bar-outer { height: 14px; background: #e0e0e0; max-width: 460px; margin: 0 auto 30px; }
+    .loading-bar-inner { height: 100%; background: #000; transition: width 0.35s ease; }
+    .loading-msg { font-size: 15px; font-weight: 700; color: #333; min-height: 24px; }
+
+    /* ── Study warning ── */
+    .warn-wrap { padding: 110px 40px; text-align: center; }
+    .warn-main { font-size: 52px; font-weight: 800; margin-bottom: 18px; }
+    .warn-sub { font-size: 16px; color: #555; margin-bottom: 14px; }
+    .warn-count { font-size: 13px; color: #999; }
+
+    /* ── Result screen ── */
+    .result-type-box {
+      text-align: center;
+      border: 2px solid #000;
+      padding: 26px;
+      margin-bottom: 18px;
+    }
+    .result-code { font-size: 26px; font-weight: 800; letter-spacing: 3px; margin-bottom: 8px; }
+    .result-name { font-size: 19px; font-weight: 700; margin-bottom: 14px; }
+    .result-desc { font-size: 13px; line-height: 1.9; color: #222; }
+    .result-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .meta-card { border: 1px solid #000; padding: 10px 14px; }
+    .meta-label { font-size: 10px; color: #666; margin-bottom: 3px; }
+    .meta-value { font-size: 15px; font-weight: 700; }
+    .stolen-red { color: #cc0000; }
+
+    .ranking-head {
+      font-size: 13px;
+      font-weight: 800;
+      border-bottom: 2px solid #000;
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+    }
+    .ranking-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 2px;
+      border-bottom: 1px solid #eee;
+      font-size: 13px;
+    }
+    .rank-num { font-weight: 800; width: 22px; text-align: center; }
+    .rank-info { flex: 1; }
+    .rank-school { font-size: 11px; color: #888; }
+    .rank-time { font-weight: 700; color: #cc0000; }
+    .rank-me { background: #fffde7; }
+    .ranking-empty { font-size: 13px; color: #aaa; padding: 8px 0; }
+
+    .share-btn {
+      width: 100%;
+      padding: 13px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nanum Gothic', sans-serif;
+      border: 2px solid #000;
+      background: #fff;
+      margin-bottom: 8px;
+    }
+    .share-btn:hover { background: #f5f5f5; }
+    .copy-msg { text-align: center; font-size: 13px; color: #cc0000; font-weight: 700; min-height: 20px; margin-bottom: 12px; word-break: break-all; }
+    .result-actions { display: flex; gap: 10px; margin-top: 6px; }
+    .btn-act {
+      flex: 1;
+      padding: 13px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nanum Gothic', sans-serif;
+      border: 2px solid #000;
+    }
+    .btn-black { background: #000; color: #fff; }
+    .btn-white { background: #fff; color: #000; }
+    .btn-black:hover { background: #333; }
+    .btn-white:hover { background: #f0f0f0; }
+    .ranking-section { margin-bottom: 18px; }
+  </style>
+</head>
+<body>
+  <div id="paper"></div>
+
+  <script>
+    // ══════════════════════════════════════════
+    // DATA
+    // ══════════════════════════════════════════
+
+    const LOADING_MESSAGES = [
+      "진짜 공부할 생각 있으신가요?",
+      "지금 이 테스트 왜 하고 계신가요?",
+      "혹시... 공부하기 싫어서 들어오신 거죠?",
+      "이거만 보고 한다 맞죠?",
+      "유튜브 끄실 수 있으세요?",
+      "지금 시간 확인해보셨나요?",
+      "방금 전에도 딴짓하셨죠?",
+      "이거 끝나고 공부하실 건가요?",
+      "결과보다 과정이 더 재밌으신가요?",
+      "지금 나가셔도 늦지 않았습니다... 나가실래요?",
+      "로딩바가 80%까지 갔다가 마음을 바꿨습니다.",
+      "곧 끝납니다. 이 말은 세 번째 쓰는 중입니다.",
+    ];
+
+    const QUESTIONS = {
+      love: [
+        {
+          text: "시험 기간에 연인(또는 좋아하는 사람)의 연락을 무시할 수 있나요?",
+          choices: ["충분히 가능하다", "절대 불가능하다"],
+          types: ["A", "B"]
+        },
+        {
+          text: "오늘 상대방 SNS를 확인했나요?",
+          choices: ["안 했다", "이미 3번 이상 확인했다"],
+          types: ["A", "B"]
+        },
+        {
+          text: "시험 공부 중 연락이 오면?",
+          choices: ["나중에 확인한다", "즉시 확인한다"],
+          types: ["A", "B"]
+        },
+        {
+          text: "시험 전날 밤에 새벽까지 연락한 적 있나요?",
+          choices: ["없다, 일찍 잔다", "있다, 거의 매번"],
+          types: ["A", "B"]
+        },
+        {
+          text: "상대방 생각에 공부가 안 된 적 있나요?",
+          choices: ["없다", "오늘도 있다"],
+          types: ["A", "B"]
+        },
+        {
+          text: "성적 vs 관계, 지금 당신에게 더 중요한 건?",
+          choices: ["지금은 성적", "당연히 관계"],
+          types: ["A", "B"]
+        },
+        {
+          text: "연인 / 좋아하는 사람 생각이 하루에 몇 번이나 나나요?",
+          choices: ["10번 이하", "셀 수도 없다"],
+          types: ["A", "B"]
+        },
+        {
+          text: "시험 끝나고 제일 먼저 할 일은?",
+          choices: ["쉬거나 잠 자기", "바로 연락하기"],
+          types: ["A", "B"]
+        },
+        {
+          text: "교실에서 상대방 프로필 사진을 멍하니 바라본 적 있나요?",
+          choices: ["없다", "있다, 자주"],
+          types: ["A", "B"]
+        },
+        {
+          text: "지금 이 순간 상대방 생각이 나나요?",
+          choices: ["별로 안 난다", "...지금 생각나고 있다"],
+          types: ["A", "B"]
+        }
+      ],
+
+      study: {
+        special: {
+          text: "지금 공부하고 있나요?",
+          choices: ["하고 있다", "안 하고 있다"],
+          types: ["continue", "exit"]
+        },
+        regular: [
+          {
+            text: "오늘 공부 계획을 세웠나요?",
+            choices: ["세웠고, 지키고 있다", "세웠지만 이미 포기했다"],
+            types: ["A", "B"]
+          },
+          {
+            text: "지금 어디서 공부하고 있나요?",
+            choices: ["독서실 또는 카페", "침대 위"],
+            types: ["A", "B"]
+          },
+          {
+            text: "오늘 집중한 시간이 총 몇 시간인가요?",
+            choices: ["4시간 이상", "2시간 이하"],
+            types: ["A", "B"]
+          },
+          {
+            text: "시험 범위를 전부 파악하고 있나요?",
+            choices: ["파악하고 있다", "아직 잘 모른다"],
+            types: ["A", "B"]
+          },
+          {
+            text: "오늘 유튜브나 릴스를 얼마나 봤나요?",
+            choices: ["거의 안 봤다", "3시간 이상"],
+            types: ["A", "B"]
+          },
+          {
+            text: "이 테스트 이전에 마지막으로 한 행동은?",
+            choices: ["공부", "유튜브 / SNS / 게임"],
+            types: ["A", "B"]
+          },
+          {
+            text: "지금 공부가 하고 싶은가요?",
+            choices: ["재미없지만 하고 있다", "재미없어서 이걸 하고 있다"],
+            types: ["A", "B"]
+          },
+          {
+            text: "이 테스트 끝나면 바로 공부할 수 있나요?",
+            choices: ["할 수 있다", "아마 다른 걸 볼 것 같다"],
+            types: ["A", "B"]
+          },
+          {
+            text: "벼락치기로 시험을 본 적 있나요?",
+            choices: ["없다 또는 거의 없다", "매번 그렇게 한다"],
+            types: ["A", "B"]
+          },
+          {
+            text: "오늘 자신에게 솔직히 점수를 매기면?",
+            choices: ["7점 이상", "5점 이하"],
+            types: ["A", "B"]
+          }
+        ]
+      },
+
+      life: [
+        {
+          text: "오늘 기상 시간은?",
+          choices: ["7시 이전", "10시 이후"],
+          types: ["A", "B"]
+        },
+        {
+          text: "오늘 밥은 제대로 챙겨 먹었나요?",
+          choices: ["3끼 다 먹었다", "하나 이상 굶었다"],
+          types: ["A", "B"]
+        },
+        {
+          text: "시험 기간에 운동을 한 적 있나요?",
+          choices: ["있다", "시험 끝나면 할 거다"],
+          types: ["A", "B"]
+        },
+        {
+          text: "현재 방 / 책상 상태는?",
+          choices: ["나름 깔끔하다", "재앙 수준이다"],
+          types: ["A", "B"]
+        },
+        {
+          text: "하루 핸드폰 사용 시간은?",
+          choices: ["3시간 이하", "6시간 이상"],
+          types: ["A", "B"]
+        },
+        {
+          text: "시험 전날 몇 시에 자나요?",
+          choices: ["12시 이전", "새벽 2시 이후"],
+          types: ["A", "B"]
+        },
+        {
+          text: "시험 기간 배달음식을 자주 시키나요?",
+          choices: ["거의 안 시킨다", "매일 시킨다"],
+          types: ["A", "B"]
+        },
+        {
+          text: "공부 중 의도치 않게 잠든 적 있나요?",
+          choices: ["없다", "오늘도 잠들었다"],
+          types: ["A", "B"]
+        },
+        {
+          text: "지금 이 테스트 말고 해야 할 일이 있나요?",
+          choices: ["없다, 다 했다", "있다, 엄청 많다"],
+          types: ["A", "B"]
+        },
+        {
+          text: "시험 기간 나의 생활 패턴을 스스로 평가하면?",
+          choices: ["나름 잘 유지하고 있다", "완전히 무너졌다"],
+          types: ["A", "B"]
+        }
+      ]
+    };
+
+    const RESULTS = {
+      love: {
+        A: {
+          code: "LOVE-REALIST",
+          name: "현실을 아는 냉철한 연인형",
+          desc: "시험 기간만큼은 공부가 먼저라는 걸 아는 당신. 연락이 와도 참을 수 있고, 감정보다 성적을 선택합니다. 속으로는 보고 싶겠지만... 그게 진짜 성숙한 사랑 아닐까요? 시험 끝나고 실컷 연애하세요."
+        },
+        B: {
+          code: "LOVE-ADDICT",
+          name: "사랑에 빠진 도파민 중독형",
+          desc: "시험 기간에도 연애가 최우선. 메시지 하나에 집중력이 무너지고, 상대방 생각에 문제도 안 읽힙니다. 공부보다 감정이 먼저인 당신, 뺏긴 시험시간만큼 성적이 아프겠지만... 그래도 사랑이 예쁘긴 하네요."
+        }
+      },
+      study: {
+        A: {
+          code: "EXAM-WARRIOR",
+          name: "의외로 열심히 하는 공부형",
+          desc: "테스트도 했는데 공부도 하고 있다고요? 대단합니다. 계획도 세우고, 범위도 파악하고, 집중 시간도 길고. 이 테스트 하는 동안 뺏긴 시간이 아깝지만, 당신은 잘 하고 있어요. 파이팅."
+        },
+        B: {
+          code: "DOPAMINE-LOOP",
+          name: "시험기간 도파민 루프형",
+          desc: "공부해야 한다는 걸 알면서도 계속 딴짓. 유튜브, 테스트, SNS... 무한 루프 중입니다. 이 결과 보고 진짜 공부 시작하세요. 지금 당장. 이 결과 캡처하는 시간도 사실 낭비입니다."
+        }
+      },
+      life: {
+        A: {
+          code: "LIFE-MANAGER",
+          name: "루틴 지키는 생활 관리형",
+          desc: "시험 기간에도 규칙적인 생활을 유지하는 당신. 밥도 챙겨 먹고, 일찍 자고, 방도 깔끔하고. 이런 분이 결국 성적도 잘 나오더라고요. 계속 이 페이스 유지하세요. 진짜 대단합니다."
+        },
+        B: {
+          code: "LIFE-CHAOS",
+          name: "시험기간 생활 붕괴형",
+          desc: "수면도, 식사도, 운동도 전부 포기. 시험 기간에 인간의 기본을 잊어버린 당신. 몸이 망가지면 공부도 안 됩니다. 일단 밥부터 드세요. 그다음 물 한 잔. 시험보다 건강이 먼저입니다."
+        }
+      }
+    };
+
+    // ══════════════════════════════════════════
+    // STATE
+    // ══════════════════════════════════════════
+
+    let S = {
+      school: '',
+      nickname: '',
+      category: null,
+      questions: [],
+      qIndex: 0,
+      answers: [],
+      startTime: null,
+      elapsed: 0,
+      timerID: null,
+      midLoadingDone: false,
+    };
+
+    // ══════════════════════════════════════════
+    // HELPERS
+    // ══════════════════════════════════════════
+
+    function fmt(sec) {
+      const m = String(Math.floor(sec / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function toMinutes(sec) { return Math.max(1, Math.ceil(sec / 60)); }
+
+    function catLabel(c) { return { love: '연애', study: '공부', life: '생활' }[c]; }
+
+    function startTimer() {
+      stopTimer();
+      S.startTime = Date.now() - S.elapsed * 1000;
+      S.timerID = setInterval(() => {
+        S.elapsed = Math.floor((Date.now() - S.startTime) / 1000);
+        const el = document.getElementById('stolen-time');
+        if (el) el.textContent = `⏱ 지금까지 뺏긴 시간: ${fmt(S.elapsed)}`;
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (S.timerID) { clearInterval(S.timerID); S.timerID = null; }
+    }
+
+    function loadUser() {
+      const d = JSON.parse(localStorage.getItem('animal_user') || '{}');
+      S.school = d.school || '';
+      S.nickname = d.nickname || '';
+    }
+
+    function saveUser() {
+      localStorage.setItem('animal_user', JSON.stringify({ school: S.school, nickname: S.nickname }));
+    }
+
+    function saveRanking(entry) {
+      let list = JSON.parse(localStorage.getItem('animal_rankings') || '[]');
+      list.push(entry);
+      list.sort((a, b) => b.seconds - a.seconds);
+      localStorage.setItem('animal_rankings', JSON.stringify(list));
+      return list;
+    }
+
+    function getResult() {
+      const cnt = { A: 0, B: 0 };
+      S.answers.forEach(a => cnt[a] = (cnt[a] || 0) + 1);
+      return RESULTS[S.category][cnt.B > cnt.A ? 'B' : 'A'];
+    }
+
+    // ══════════════════════════════════════════
+    // PAPER SHELL
+    // ══════════════════════════════════════════
+
+    function header(num, subject) {
+      return `
+        <div class="paper-top-bar">
+          <span class="paper-meta">2025학년도 시험기간 도파민테스트 문제지</span>
+          <span class="paper-big-num">${num}</span>
+        </div>
+        <hr class="div1">
+        <div class="paper-subject-row">
+          <span class="paper-subject">${subject}</span>
+          <span class="paper-badge">홀수형</span>
+        </div>
+        <hr class="div2">
+      `;
+    }
+
+    function footer(cur, total = 16) {
+      return `
+        <div class="paper-footer">
+          <span>* 이 문제지에 관한 저작권은 시험기간도파민테스트에 있습니다.</span>
+          <span>${cur} / ${total}</span>
+        </div>
+      `;
+    }
+
+    // ══════════════════════════════════════════
+    // SCREENS
+    // ══════════════════════════════════════════
+
+    function renderIntro() {
+      document.getElementById('paper').innerHTML = `
+        ${header(1, '제 1 교시&nbsp;&nbsp;&nbsp;도파민 영역')}
+        <div class="info-box">
+          <div class="info-box-title">[안내문] 다음을 읽고, 정보를 입력하시오.</div>
+          <div class="info-box-body">
+            시험기간 도파민 테스트에 오신 것을 환영합니다. 본 테스트는 시험기간에 당신의 도파민 중독 수준을 측정하기 위해 설계되었습니다. <strong>솔직하게</strong> 답변해 주세요. 테스트 결과는 재미를 위한 것이며, 어떠한 학술적 근거도 없습니다.
+            <p class="info-box-warn">※ 본 테스트를 진행하는 동안 뺏기는 시간은 측정됩니다.</p>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-label"><span class="q-num">1.</span><span>수험생의 <strong>학교 이름</strong>을 기입하시오.</span></div>
+          <input class="q-input" id="inp-school" type="text" placeholder="예: OO고등학교, OO대학교" value="${S.school}">
+        </div>
+        <div class="q-item">
+          <div class="q-label"><span class="q-num">2.</span><span>수험생의 <strong>닉네임</strong>을 기입하시오.</span></div>
+          <input class="q-input" id="inp-nick" type="text" placeholder="닉네임을 입력하세요" value="${S.nickname}">
+        </div>
+        <button class="btn-next" onclick="goCategory()">다음 페이지로 →</button>
+        ${footer(1)}
+      `;
+    }
+
+    function goCategory() {
+      const school = document.getElementById('inp-school').value.trim();
+      const nick   = document.getElementById('inp-nick').value.trim();
+      if (!school || !nick) { alert('학교 이름과 닉네임을 모두 입력해 주세요.'); return; }
+      S.school = school; S.nickname = nick;
+      saveUser();
+      renderCategory();
+    }
+
+    function renderCategory() {
+      // Reset quiz state
+      S.questions = []; S.qIndex = 0; S.answers = [];
+      S.elapsed = 0; S.midLoadingDone = false;
+      stopTimer();
+
+      document.getElementById('paper').innerHTML = `
+        ${header(2, '제 2 교시&nbsp;&nbsp;&nbsp;카테고리 선택')}
+        <div class="info-box">
+          <div class="info-box-title">[안내문] 다음을 읽고, 카테고리를 선택하시오.</div>
+          <div class="info-box-body">
+            아래 3개의 카테고리 중 <strong>하나를 선택</strong>하시오. 카테고리 선택 순간부터 뺏기는 시간이 측정됩니다. 가장 솔직하게 자신을 대변하는 카테고리를 선택하세요.
+          </div>
+        </div>
+        <div class="category-grid">
+          <button class="category-btn" onclick="selectCat('love')">
+            <div class="cat-circle">①</div>
+            <div class="cat-name">연애</div>
+            <div class="cat-desc">연인 / 짝사랑 / 설렘</div>
+          </button>
+          <button class="category-btn" onclick="selectCat('study')">
+            <div class="cat-circle">②</div>
+            <div class="cat-name">공부</div>
+            <div class="cat-desc">학습 / 집중 / 의지력</div>
+          </button>
+          <button class="category-btn" onclick="selectCat('life')">
+            <div class="cat-circle">③</div>
+            <div class="cat-name">생활</div>
+            <div class="cat-desc">수면 / 식사 / 루틴</div>
+          </button>
+        </div>
+        ${footer(2)}
+      `;
+    }
+
+    function selectCat(cat) {
+      S.category = cat;
+      S.questions = cat === 'study' ? QUESTIONS.study.regular : QUESTIONS[cat];
+      startTimer();
+      if (cat === 'study') renderStudySpecial();
+      else renderQuestion();
+    }
+
+    function renderStudySpecial() {
+      const q = QUESTIONS.study.special;
+      document.getElementById('paper').innerHTML = `
+        ${header(3, '도파민 영역')}
+        <div id="stolen-time" class="stolen-time">⏱ 지금까지 뺏긴 시간: 00:00</div>
+        <div class="progress-bar"><div class="progress-bar-inner" style="width:0%"></div></div>
+        <div class="question-box">
+          <div class="question-num-label">[사전 확인 문항]</div>
+          <div class="question-text">${q.text}</div>
+        </div>
+        <div class="choices-list">
+          <button class="choice-btn" onclick="studySpecial('continue')">
+            <span class="choice-sym">①</span><span>${q.choices[0]}</span>
+          </button>
+          <button class="choice-btn" onclick="studySpecial('exit')">
+            <span class="choice-sym">②</span><span>${q.choices[1]}</span>
+          </button>
+        </div>
+        ${footer(3)}
+      `;
+    }
+
+    function studySpecial(choice) {
+      if (choice === 'exit') {
+        renderStudyWarning();
+      } else {
+        renderQuestion();
+      }
+    }
+
+    function renderStudyWarning() {
+      stopTimer();
+      let n = 5;
+      document.getElementById('paper').innerHTML = `
+        <div class="warn-wrap">
+          <div class="warn-main">공부하러 가세요.</div>
+          <div class="warn-sub">지금 당장 책을 펴세요.</div>
+          <div class="warn-count" id="wc">${n}초 후 메인으로 이동합니다.</div>
+        </div>
+      `;
+      const iv = setInterval(() => {
+        n--;
+        const el = document.getElementById('wc');
+        if (el) el.textContent = `${n}초 후 메인으로 이동합니다.`;
+        if (n <= 0) { clearInterval(iv); resetHome(); }
+      }, 1000);
+    }
+
+    function resetHome() {
+      S.school = S.school; S.nickname = S.nickname;
+      S.category = null; S.questions = []; S.qIndex = 0;
+      S.answers = []; S.elapsed = 0; S.midLoadingDone = false;
+      stopTimer();
+      renderIntro();
+    }
+
+    function renderQuestion() {
+      const q = S.questions[S.qIndex];
+      const total = S.questions.length;
+      const cur = S.qIndex + 1;
+      const pct = (cur / total) * 100;
+
+      // page number: cat selection=2, study special=3 (so study regular starts at 4, others at 3)
+      let pg = S.category === 'study' ? 3 + cur : 2 + cur;
+      if (S.midLoadingDone) pg += 1; // skip loading page slot
+
+      document.getElementById('paper').innerHTML = `
+        ${header(pg, '도파민 영역')}
+        <div class="q-meta-row">
+          <span>${cur} / ${total} 문항</span>
+          <span>${catLabel(S.category)} 카테고리</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-bar-inner" style="width:${pct}%"></div>
+        </div>
+        <div id="stolen-time" class="stolen-time">⏱ 지금까지 뺏긴 시간: ${fmt(S.elapsed)}</div>
+        <div class="question-box">
+          <div class="question-num-label">문항 ${cur}</div>
+          <div class="question-text">${q.text}</div>
+        </div>
+        <div class="choices-list" id="choices">
+          <button class="choice-btn" onclick="answer(0)">
+            <span class="choice-sym">①</span><span>${q.choices[0]}</span>
+          </button>
+          <button class="choice-btn" onclick="answer(1)">
+            <span class="choice-sym">②</span><span>${q.choices[1]}</span>
+          </button>
+        </div>
+        ${footer(pg)}
+      `;
+    }
+
+    function answer(idx) {
+      // Disable buttons to prevent double-click
+      document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+
+      const q = S.questions[S.qIndex];
+      S.answers.push(q.types[idx]);
+
+      const total = S.questions.length;
+
+      if (S.qIndex === 4 && !S.midLoadingDone) {
+        // After 5th question → mid loading
+        S.qIndex++;
+        S.midLoadingDone = true;
+        setTimeout(() => renderLoading(false), 120);
+      } else if (S.qIndex === total - 1) {
+        // Last question → final loading
+        S.qIndex++;
+        setTimeout(() => renderLoading(true), 120);
+      } else {
+        S.qIndex++;
+        setTimeout(() => renderQuestion(), 120);
+      }
+    }
+
+    // Loading waypoints: percent values at elapsed ms
+    const WAYPOINTS = [
+      [0,    0],
+      [900,  38],
+      [1700, 73],
+      [2300, 82],
+      [2700, 24],  // drop
+      [3500, 59],
+      [4100, 91],
+      [4600, 34],  // drop
+      [5400, 67],
+      [6200, 88],
+      [7000, 95],
+      [8000, 100],
+    ];
+
+    function interpPct(elapsed) {
+      for (let i = 0; i < WAYPOINTS.length - 1; i++) {
+        const [t0, p0] = WAYPOINTS[i];
+        const [t1, p1] = WAYPOINTS[i + 1];
+        if (elapsed >= t0 && elapsed <= t1) {
+          const r = (elapsed - t0) / (t1 - t0);
+          return Math.round(p0 + (p1 - p0) * r);
+        }
+      }
+      return 100;
+    }
+
+    function renderLoading(isFinal) {
+      const pgNum = isFinal ? (S.category === 'study' ? 15 : 14) : (S.category === 'study' ? 9 : 8);
+
+      document.getElementById('paper').innerHTML = `
+        <div class="loading-wrap">
+          <div class="loading-subtitle">${isFinal ? '최종 결과를 분석하는 중...' : '중간 분석 중...'}</div>
+          <div class="loading-pct" id="lpct">0%</div>
+          <div class="loading-bar-outer">
+            <div class="loading-bar-inner" id="lbar" style="width:0%"></div>
+          </div>
+          <div class="loading-msg" id="lmsg">${LOADING_MESSAGES[0]}</div>
+        </div>
+        ${footer(pgNum)}
+      `;
+
+      const TOTAL = 8000;
+      let elapsed = 0;
+      let msgIdx = 0;
+
+      const iv = setInterval(() => {
+        elapsed += 100;
+
+        const p = interpPct(elapsed);
+        const pctEl = document.getElementById('lpct');
+        const barEl = document.getElementById('lbar');
+        if (pctEl) pctEl.textContent = p + '%';
+        if (barEl) barEl.style.width = p + '%';
+
+        if (elapsed % 1800 === 0) {
+          msgIdx = (msgIdx + 1) % LOADING_MESSAGES.length;
+          const msgEl = document.getElementById('lmsg');
+          if (msgEl) msgEl.textContent = LOADING_MESSAGES[msgIdx];
+        }
+
+        if (elapsed >= TOTAL) {
+          clearInterval(iv);
+          if (pctEl) pctEl.textContent = '100%';
+          if (barEl) barEl.style.width = '100%';
+          setTimeout(() => {
+            if (isFinal) renderResult();
+            else renderQuestion();
+          }, 600);
+        }
+      }, 100);
+    }
+
+    function renderResult() {
+      stopTimer();
+      const res = getResult();
+      const mins = toMinutes(S.elapsed);
+
+      const entry = {
+        school:   S.school,
+        nickname: S.nickname,
+        category: catLabel(S.category),
+        code:     res.code,
+        seconds:  S.elapsed,
+        minutes:  mins,
+        ts:       Date.now()
+      };
+      const all  = saveRanking(entry);
+      const top5 = all.slice(0, 5);
+      const myTs = entry.ts;
+
+      const rowsHTML = top5.length ? top5.map((r, i) => `
+        <div class="ranking-row ${r.ts === myTs ? 'rank-me' : ''}">
+          <span class="rank-num">${i + 1}</span>
+          <span class="rank-info">
+            <span>${r.nickname}</span>
+            <span class="rank-school">(${r.school})</span>
+          </span>
+          <span class="rank-time">${r.minutes}분</span>
+        </div>
+      `).join('') : '<div class="ranking-empty">아직 기록이 없습니다.</div>';
+
+      document.getElementById('paper').innerHTML = `
+        ${header(16, '제 최종 교시&nbsp;&nbsp;&nbsp;결과 발표')}
+        <div class="result-type-box">
+          <div class="result-code">${res.code}</div>
+          <div class="result-name">${res.name}</div>
+          <div class="result-desc">${res.desc}</div>
+        </div>
+        <div class="result-meta-grid">
+          <div class="meta-card">
+            <div class="meta-label">수험생</div>
+            <div class="meta-value">${S.nickname}</div>
+          </div>
+          <div class="meta-card">
+            <div class="meta-label">학교</div>
+            <div class="meta-value">${S.school}</div>
+          </div>
+          <div class="meta-card">
+            <div class="meta-label">뺏긴 시험시간</div>
+            <div class="meta-value stolen-red">${mins}분</div>
+          </div>
+        </div>
+        <div class="ranking-section">
+          <div class="ranking-head">🏆 도파민 랭킹 TOP 5 (이 기기 기준)</div>
+          ${rowsHTML}
+        </div>
+        <button class="share-btn" onclick="doShare('${res.code}', ${mins})">📋 결과 공유 문구 복사</button>
+        <div class="copy-msg" id="copy-msg"></div>
+        <div class="result-actions">
+          <button class="btn-act btn-white" onclick="renderCategory()">다른 카테고리 하기</button>
+          <button class="btn-act btn-black" onclick="resetHome()">메인으로</button>
+        </div>
+        ${footer(16)}
+      `;
+    }
+
+    function doShare(code, mins) {
+      const text = `${S.school} ${S.nickname}님의 시험시간은 ${mins}분 뺏겼고, 결과는 ${code}입니다.`;
+      const msg = document.getElementById('copy-msg');
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          if (msg) { msg.textContent = '공유 문구가 복사됐습니다!'; setTimeout(() => { if (msg) msg.textContent = ''; }, 3000); }
+        })
+        .catch(() => {
+          if (msg) msg.textContent = text;
+        });
+    }
+
+    // ══════════════════════════════════════════
+    // INIT
+    // ══════════════════════════════════════════
+    loadUser();
+    renderIntro();
+  </script>
+</body>
+</html>
