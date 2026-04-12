@@ -27,6 +27,7 @@
 ├── next.config.ts           # Next.js 설정 파일
 ├── package.json             # 프로젝트 메타 정보 및 의존성
 ├── pnpm-lock.yaml           # pnpm 잠금 파일
+├── pnpm-workspace.yaml      # pnpm 설정, 빌드 스크립트 허용 패키지 관리
 ├── postcss.config.mjs       # PostCSS / Tailwind 설정
 ├── test1.html               # 원본 단일 HTML 파일(참조용)
 └── tsconfig.json            # TypeScript 설정
@@ -156,7 +157,28 @@ Tailwind CSS 4 사용을 위한 PostCSS 설정 파일입니다.
 
 현재는 최소 설정만 포함합니다.
 
-### 4.7 `tsconfig.json`
+### 4.7 `pnpm-workspace.yaml`
+
+pnpm 관련 프로젝트 설정 파일입니다.
+
+역할:
+
+- 워크스페이스 루트 지정
+- 배포/설치 시 실행이 필요한 의존성 빌드 스크립트 허용
+
+현재 설정:
+
+```yaml
+packages:
+  - .
+
+allowBuilds:
+  sharp: true
+```
+
+이 설정은 pnpm 10 계열에서 `sharp`의 설치 스크립트가 차단되어 배포 경고가 발생하는 상황을 줄이기 위한 목적입니다.
+
+### 4.8 `tsconfig.json`
 
 TypeScript 컴파일 옵션을 담당합니다.
 
@@ -166,7 +188,7 @@ TypeScript 컴파일 옵션을 담당합니다.
 - `.ts`, `.tsx` 파일 타입 검사
 - 번들러 기반 모듈 해석 설정
 
-### 4.8 `LOCAL_RUN_GUIDE.md`
+### 4.9 `LOCAL_RUN_GUIDE.md`
 
 비개발자도 실행할 수 있도록 정리한 안내 문서입니다.
 
