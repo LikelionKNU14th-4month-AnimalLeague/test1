@@ -5,7 +5,14 @@ import { useEffect, useRef, useState } from "react";
 type Category = "love" | "study" | "life";
 type ResultType = "A" | "B";
 type SpecialType = "continue" | "exit";
-type Screen = "intro" | "category" | "studySpecial" | "question" | "loading" | "warning" | "result";
+type Screen =
+  | "intro"
+  | "category"
+  | "studySpecial"
+  | "question"
+  | "loading"
+  | "warning"
+  | "result";
 
 type Question<T extends string = ResultType | SpecialType> = {
   text: string;
@@ -44,6 +51,12 @@ const LOADING_MESSAGES = [
   "지금 나가셔도 늦지 않았습니다... 나가실래요?",
   "로딩바가 80%까지 갔다가 마음을 바꿨습니다.",
   "곧 끝납니다. 이 말은 세 번째 쓰는 중입니다.",
+  "유튜브 쇼츠 보다가 여기까지 흘러들어오신 거 다 압니다.",
+  "진짜 공부할 거 아니면 지금 'X' 버튼 누르셔도 무죄입니다.",
+  "에러 안 난 게 어디예요. 조금만 더 기다려 주세요.",
+  "지금 로딩 바는 디자인입니다. 사실 데이터는 아직 안 왔어요.",
+  "지금 핫식스 몇 캔째인가요? 심장 소리가 서버까지 들려요.",
+  "방금 '이번 시험은 버릴까'라고 생각하셨죠? 서버가 읽었습니다.",
 ] as const;
 
 const QUESTIONS: Record<Exclude<Category, "study">, QuizQuestion[]> & {
@@ -53,43 +66,167 @@ const QUESTIONS: Record<Exclude<Category, "study">, QuizQuestion[]> & {
   };
 } = {
   love: [
-    { text: "시험 기간에 연인(또는 좋아하는 사람)의 연락을 무시할 수 있나요?", choices: ["충분히 가능하다", "절대 불가능하다"], types: ["A", "B"] },
-    { text: "오늘 상대방 SNS를 확인했나요?", choices: ["안 했다", "이미 3번 이상 확인했다"], types: ["A", "B"] },
-    { text: "시험 공부 중 연락이 오면?", choices: ["나중에 확인한다", "즉시 확인한다"], types: ["A", "B"] },
-    { text: "시험 전날 밤에 새벽까지 연락한 적 있나요?", choices: ["없다, 일찍 잔다", "있다, 거의 매번"], types: ["A", "B"] },
-    { text: "상대방 생각에 공부가 안 된 적 있나요?", choices: ["없다", "오늘도 있다"], types: ["A", "B"] },
-    { text: "성적 vs 관계, 지금 당신에게 더 중요한 건?", choices: ["지금은 성적", "당연히 관계"], types: ["A", "B"] },
-    { text: "연인 / 좋아하는 사람 생각이 하루에 몇 번이나 나나요?", choices: ["10번 이하", "셀 수도 없다"], types: ["A", "B"] },
-    { text: "시험 끝나고 제일 먼저 할 일은?", choices: ["쉬거나 잠 자기", "바로 연락하기"], types: ["A", "B"] },
-    { text: "교실에서 상대방 프로필 사진을 멍하니 바라본 적 있나요?", choices: ["없다", "있다, 자주"], types: ["A", "B"] },
-    { text: "지금 이 순간 상대방 생각이 나나요?", choices: ["별로 안 난다", "...지금 생각나고 있다"], types: ["A", "B"] },
+    {
+      text: "시험 기간에 연인(또는 좋아하는 사람)의 연락을 무시할 수 있나요?",
+      choices: ["충분히 가능하다", "절대 불가능하다"],
+      types: ["A", "B"],
+    },
+    {
+      text: "오늘 상대방 SNS를 확인했나요?",
+      choices: ["안 했다", "이미 3번 이상 확인했다"],
+      types: ["A", "B"],
+    },
+    {
+      text: "시험 공부 중 연락이 오면?",
+      choices: ["나중에 확인한다", "즉시 확인한다"],
+      types: ["A", "B"],
+    },
+    {
+      text: "시험 전날 밤에 새벽까지 연락한 적 있나요?",
+      choices: ["없다, 일찍 잔다", "있다, 거의 매번"],
+      types: ["A", "B"],
+    },
+    {
+      text: "상대방 생각에 공부가 안 된 적 있나요?",
+      choices: ["없다", "오늘도 있다"],
+      types: ["A", "B"],
+    },
+    {
+      text: "성적 vs 관계, 지금 당신에게 더 중요한 건?",
+      choices: ["지금은 성적", "당연히 관계"],
+      types: ["A", "B"],
+    },
+    {
+      text: "연인 / 좋아하는 사람 생각이 하루에 몇 번이나 나나요?",
+      choices: ["10번 이하", "셀 수도 없다"],
+      types: ["A", "B"],
+    },
+    {
+      text: "시험 끝나고 제일 먼저 할 일은?",
+      choices: ["쉬거나 잠 자기", "바로 연락하기"],
+      types: ["A", "B"],
+    },
+    {
+      text: "교실에서 상대방 프로필 사진을 멍하니 바라본 적 있나요?",
+      choices: ["없다", "있다, 자주"],
+      types: ["A", "B"],
+    },
+    {
+      text: "지금 이 순간 상대방 생각이 나나요?",
+      choices: ["별로 안 난다", "...지금 생각나고 있다"],
+      types: ["A", "B"],
+    },
   ],
   study: {
-    special: { text: "지금 공부하고 있나요?", choices: ["하고 있다", "안 하고 있다"], types: ["continue", "exit"] },
+    special: {
+      text: "지금 공부하고 있나요?",
+      choices: ["하고 있다", "안 하고 있다"],
+      types: ["continue", "exit"],
+    },
     regular: [
-      { text: "오늘 공부 계획을 세웠나요?", choices: ["세웠고, 지키고 있다", "세웠지만 이미 포기했다"], types: ["A", "B"] },
-      { text: "지금 어디서 공부하고 있나요?", choices: ["독서실 또는 카페", "침대 위"], types: ["A", "B"] },
-      { text: "오늘 집중한 시간이 총 몇 시간인가요?", choices: ["4시간 이상", "2시간 이하"], types: ["A", "B"] },
-      { text: "시험 범위를 전부 파악하고 있나요?", choices: ["파악하고 있다", "아직 잘 모른다"], types: ["A", "B"] },
-      { text: "오늘 유튜브나 릴스를 얼마나 봤나요?", choices: ["거의 안 봤다", "3시간 이상"], types: ["A", "B"] },
-      { text: "이 테스트 이전에 마지막으로 한 행동은?", choices: ["공부", "유튜브 / SNS / 게임"], types: ["A", "B"] },
-      { text: "지금 공부가 하고 싶은가요?", choices: ["재미없지만 하고 있다", "재미없어서 이걸 하고 있다"], types: ["A", "B"] },
-      { text: "이 테스트 끝나면 바로 공부할 수 있나요?", choices: ["할 수 있다", "아마 다른 걸 볼 것 같다"], types: ["A", "B"] },
-      { text: "벼락치기로 시험을 본 적 있나요?", choices: ["없다 또는 거의 없다", "매번 그렇게 한다"], types: ["A", "B"] },
-      { text: "오늘 자신에게 솔직히 점수를 매기면?", choices: ["7점 이상", "5점 이하"], types: ["A", "B"] },
+      {
+        text: "오늘 공부 계획을 세웠나요?",
+        choices: ["세웠고, 지키고 있다", "세웠지만 이미 포기했다"],
+        types: ["A", "B"],
+      },
+      {
+        text: "지금 어디서 공부하고 있나요?",
+        choices: ["독서실 또는 카페", "침대 위"],
+        types: ["A", "B"],
+      },
+      {
+        text: "오늘 집중한 시간이 총 몇 시간인가요?",
+        choices: ["4시간 이상", "2시간 이하"],
+        types: ["A", "B"],
+      },
+      {
+        text: "시험 범위를 전부 파악하고 있나요?",
+        choices: ["파악하고 있다", "아직 잘 모른다"],
+        types: ["A", "B"],
+      },
+      {
+        text: "오늘 유튜브나 릴스를 얼마나 봤나요?",
+        choices: ["거의 안 봤다", "3시간 이상"],
+        types: ["A", "B"],
+      },
+      {
+        text: "이 테스트 이전에 마지막으로 한 행동은?",
+        choices: ["공부", "유튜브 / SNS / 게임"],
+        types: ["A", "B"],
+      },
+      {
+        text: "지금 공부가 하고 싶은가요?",
+        choices: ["재미없지만 하고 있다", "재미없어서 이걸 하고 있다"],
+        types: ["A", "B"],
+      },
+      {
+        text: "이 테스트 끝나면 바로 공부할 수 있나요?",
+        choices: ["할 수 있다", "아마 다른 걸 볼 것 같다"],
+        types: ["A", "B"],
+      },
+      {
+        text: "벼락치기로 시험을 본 적 있나요?",
+        choices: ["없다 또는 거의 없다", "매번 그렇게 한다"],
+        types: ["A", "B"],
+      },
+      {
+        text: "오늘 자신에게 솔직히 점수를 매기면?",
+        choices: ["7점 이상", "5점 이하"],
+        types: ["A", "B"],
+      },
     ],
   },
   life: [
-    { text: "오늘 기상 시간은?", choices: ["7시 이전", "10시 이후"], types: ["A", "B"] },
-    { text: "오늘 밥은 제대로 챙겨 먹었나요?", choices: ["3끼 다 먹었다", "하나 이상 굶었다"], types: ["A", "B"] },
-    { text: "시험 기간에 운동을 한 적 있나요?", choices: ["있다", "시험 끝나면 할 거다"], types: ["A", "B"] },
-    { text: "현재 방 / 책상 상태는?", choices: ["나름 깔끔하다", "재앙 수준이다"], types: ["A", "B"] },
-    { text: "하루 핸드폰 사용 시간은?", choices: ["3시간 이하", "6시간 이상"], types: ["A", "B"] },
-    { text: "시험 전날 몇 시에 자나요?", choices: ["12시 이전", "새벽 2시 이후"], types: ["A", "B"] },
-    { text: "시험 기간 배달음식을 자주 시키나요?", choices: ["거의 안 시킨다", "매일 시킨다"], types: ["A", "B"] },
-    { text: "공부 중 의도치 않게 잠든 적 있나요?", choices: ["없다", "오늘도 잠들었다"], types: ["A", "B"] },
-    { text: "지금 이 테스트 말고 해야 할 일이 있나요?", choices: ["없다, 다 했다", "있다, 엄청 많다"], types: ["A", "B"] },
-    { text: "시험 기간 나의 생활 패턴을 스스로 평가하면?", choices: ["나름 잘 유지하고 있다", "완전히 무너졌다"], types: ["A", "B"] },
+    {
+      text: "오늘 기상 시간은?",
+      choices: ["7시 이전", "10시 이후"],
+      types: ["A", "B"],
+    },
+    {
+      text: "오늘 밥은 제대로 챙겨 먹었나요?",
+      choices: ["3끼 다 먹었다", "하나 이상 굶었다"],
+      types: ["A", "B"],
+    },
+    {
+      text: "시험 기간에 운동을 한 적 있나요?",
+      choices: ["있다", "시험 끝나면 할 거다"],
+      types: ["A", "B"],
+    },
+    {
+      text: "현재 방 / 책상 상태는?",
+      choices: ["나름 깔끔하다", "재앙 수준이다"],
+      types: ["A", "B"],
+    },
+    {
+      text: "하루 핸드폰 사용 시간은?",
+      choices: ["3시간 이하", "6시간 이상"],
+      types: ["A", "B"],
+    },
+    {
+      text: "시험 전날 몇 시에 자나요?",
+      choices: ["12시 이전", "새벽 2시 이후"],
+      types: ["A", "B"],
+    },
+    {
+      text: "시험 기간 배달음식을 자주 시키나요?",
+      choices: ["거의 안 시킨다", "매일 시킨다"],
+      types: ["A", "B"],
+    },
+    {
+      text: "공부 중 의도치 않게 잠든 적 있나요?",
+      choices: ["없다", "오늘도 잠들었다"],
+      types: ["A", "B"],
+    },
+    {
+      text: "지금 이 테스트 말고 해야 할 일이 있나요?",
+      choices: ["없다, 다 했다", "있다, 엄청 많다"],
+      types: ["A", "B"],
+    },
+    {
+      text: "시험 기간 나의 생활 패턴을 스스로 평가하면?",
+      choices: ["나름 잘 유지하고 있다", "완전히 무너졌다"],
+      types: ["A", "B"],
+    },
   ],
 };
 
@@ -132,19 +269,36 @@ const RESULTS: Record<Category, Record<ResultType, ResultEntry>> = {
   },
 };
 
-const WAYPOINTS: ReadonlyArray<readonly [number, number]> = [
+// 중간 로딩용 웨이포인트 (15초)
+const WAYPOINTS_MID: ReadonlyArray<readonly [number, number]> = [
   [0, 0],
-  [900, 38],
-  [1700, 73],
-  [2300, 82],
-  [2700, 24],
-  [3500, 59],
-  [4100, 91],
-  [4600, 34],
-  [5400, 67],
-  [6200, 88],
-  [7000, 95],
-  [8000, 100],
+  [1688, 38],
+  [3188, 73],
+  [4313, 82],
+  [5063, 24],
+  [6563, 59],
+  [7688, 91],
+  [8625, 34],
+  [10125, 67],
+  [11625, 88],
+  [13125, 95],
+  [15000, 100],
+];
+
+// 최종 로딩용 웨이포인트 (20초)
+const WAYPOINTS_FINAL: ReadonlyArray<readonly [number, number]> = [
+  [0, 0],
+  [2250, 38],
+  [4250, 73],
+  [5750, 82],
+  [6750, 24],
+  [8750, 59],
+  [10250, 91],
+  [11500, 34],
+  [13500, 67],
+  [15500, 88],
+  [17500, 95],
+  [20000, 100],
 ];
 
 function fmt(sec: number) {
@@ -161,10 +315,13 @@ function catLabel(category: Category) {
   return { love: "연애", study: "공부", life: "생활" }[category];
 }
 
-function interpPct(elapsed: number) {
-  for (let i = 0; i < WAYPOINTS.length - 1; i += 1) {
-    const [t0, p0] = WAYPOINTS[i];
-    const [t1, p1] = WAYPOINTS[i + 1];
+function interpPct(
+  elapsed: number,
+  waypoints: ReadonlyArray<readonly [number, number]>,
+) {
+  for (let i = 0; i < waypoints.length - 1; i += 1) {
+    const [t0, p0] = waypoints[i];
+    const [t1, p1] = waypoints[i + 1];
     if (elapsed >= t0 && elapsed <= t1) {
       const ratio = (elapsed - t0) / (t1 - t0);
       return Math.round(p0 + (p1 - p0) * ratio);
@@ -177,12 +334,17 @@ function Header({ num, subjectHtml }: { num: number; subjectHtml: string }) {
   return (
     <>
       <div className="paper-top-bar">
-        <span className="paper-meta">2025학년도 시험기간 도파민테스트 문제지</span>
+        <span className="paper-meta">
+          2026학년도 시험기간 도파민 테스트 문제지
+        </span>
         <span className="paper-big-num">{num}</span>
       </div>
       <hr className="div1" />
       <div className="paper-subject-row">
-        <span className="paper-subject" dangerouslySetInnerHTML={{ __html: subjectHtml }} />
+        <span
+          className="paper-subject"
+          dangerouslySetInnerHTML={{ __html: subjectHtml }}
+        />
         <span className="paper-badge">홀수형</span>
       </div>
       <hr className="div2" />
@@ -193,8 +355,12 @@ function Header({ num, subjectHtml }: { num: number; subjectHtml: string }) {
 function Footer({ cur, total = 16 }: { cur: number; total?: number }) {
   return (
     <div className="paper-footer">
-      <span>* 이 문제지에 관한 저작권은 시험기간도파민테스트에 있습니다.</span>
-      <span>{cur} / {total}</span>
+      <span>
+        * 이 문제지에 관한 저작권은 시험기간 도파민 테스트에 있습니다.
+      </span>
+      <span>
+        {cur} / {total}
+      </span>
     </div>
   );
 }
@@ -212,7 +378,9 @@ export default function Home() {
   const [screen, setScreen] = useState<Screen>("intro");
   const [warningCountdown, setWarningCountdown] = useState(5);
   const [loadingPct, setLoadingPct] = useState(0);
-  const [loadingMsg, setLoadingMsg] = useState<(typeof LOADING_MESSAGES)[number]>(LOADING_MESSAGES[0]);
+  const [loadingMsg, setLoadingMsg] = useState<
+    (typeof LOADING_MESSAGES)[number]
+  >(LOADING_MESSAGES[0]);
   const [loadingFinal, setLoadingFinal] = useState(false);
   const [ranking, setRanking] = useState<RankingEntry[]>([]);
   const [copyMsg, setCopyMsg] = useState("");
@@ -221,7 +389,9 @@ export default function Home() {
   const resultSavedRef = useRef(false);
 
   useEffect(() => {
-    const saved = JSON.parse(window.localStorage.getItem("animal_user") || "{}") as Partial<{
+    const saved = JSON.parse(
+      window.localStorage.getItem("animal_user") || "{}",
+    ) as Partial<{
       school: string;
       nickname: string;
     }>;
@@ -268,17 +438,22 @@ export default function Home() {
     setLoadingPct(0);
     setLoadingMsg(LOADING_MESSAGES[0]);
 
-    const total = 8000;
+    const total = loadingFinal ? 20000 : 15000;
+    const waypoints = loadingFinal ? WAYPOINTS_FINAL : WAYPOINTS_MID;
     let elapsedMs = 0;
     let msgIdx = 0;
 
     const timer = window.setInterval(() => {
       elapsedMs += 100;
-      const pct = interpPct(elapsedMs);
+      const pct = interpPct(elapsedMs, waypoints);
       setLoadingPct(pct);
 
       if (elapsedMs % 1800 === 0) {
-        msgIdx = (msgIdx + 1) % LOADING_MESSAGES.length;
+        let nextIdx;
+        do {
+          nextIdx = Math.floor(Math.random() * LOADING_MESSAGES.length);
+        } while (nextIdx === msgIdx);
+        msgIdx = nextIdx;
         setLoadingMsg(LOADING_MESSAGES[msgIdx]);
       }
 
@@ -316,7 +491,9 @@ export default function Home() {
     };
     currentEntryTsRef.current = entry.ts;
 
-    const list = JSON.parse(window.localStorage.getItem("animal_rankings") || "[]") as RankingEntry[];
+    const list = JSON.parse(
+      window.localStorage.getItem("animal_rankings") || "[]",
+    ) as RankingEntry[];
     list.push(entry);
     list.sort((a, b) => b.seconds - a.seconds);
     window.localStorage.setItem("animal_rankings", JSON.stringify(list));
@@ -385,7 +562,11 @@ export default function Home() {
 
   function selectCategory(nextCategory: Category) {
     setCategory(nextCategory);
-    setQuestions(nextCategory === "study" ? QUESTIONS.study.regular : QUESTIONS[nextCategory]);
+    setQuestions(
+      nextCategory === "study"
+        ? QUESTIONS.study.regular
+        : QUESTIONS[nextCategory],
+    );
     setQIndex(0);
     setAnswers([]);
     setElapsed(0);
@@ -484,9 +665,20 @@ export default function Home() {
   const currentQuestion = questions[qIndex];
   const totalQuestions = questions.length;
   const currentNumber = qIndex + 1;
-  const questionPct = totalQuestions ? (currentNumber / totalQuestions) * 100 : 0;
-  const questionPage = category === "study" ? 3 + currentNumber + (midLoadingDone ? 1 : 0) : 2 + currentNumber + (midLoadingDone ? 1 : 0);
-  const loadingPage = loadingFinal ? (category === "study" ? 15 : 14) : (category === "study" ? 9 : 8);
+  const questionPct = totalQuestions
+    ? (currentNumber / totalQuestions) * 100
+    : 0;
+  const questionPage =
+    category === "study"
+      ? 3 + currentNumber + (midLoadingDone ? 1 : 0)
+      : 2 + currentNumber + (midLoadingDone ? 1 : 0);
+  const loadingPage = loadingFinal
+    ? category === "study"
+      ? 15
+      : 14
+    : category === "study"
+      ? 9
+      : 8;
   const result = screen === "result" ? getResult() : null;
   const minutes = toMinutes(elapsed);
 
@@ -494,48 +686,98 @@ export default function Home() {
     <main id="paper">
       {screen === "intro" && (
         <>
-          <Header num={1} subjectHtml={"제 1 교시&nbsp;&nbsp;&nbsp;도파민 영역"} />
+          <Header
+            num={1}
+            subjectHtml={"제 1 교시&nbsp;&nbsp;&nbsp;도파민 영역"}
+          />
           <div className="info-box">
-            <div className="info-box-title">[안내문] 다음을 읽고, 정보를 입력하시오.</div>
+            <div className="info-box-title">
+              [안내문] 다음을 읽고, 정보를 입력하시오.
+            </div>
             <div className="info-box-body">
-              시험기간 도파민 테스트에 오신 것을 환영합니다. 본 테스트는 시험기간에 당신의 도파민 중독 수준을 측정하기 위해 설계되었습니다. <strong>솔직하게</strong> 답변해 주세요. 테스트 결과는 재미를 위한 것이며, 어떠한 학술적 근거도 없습니다.
-              <p className="info-box-warn">※ 본 테스트를 진행하는 동안 뺏기는 시간은 측정됩니다.</p>
+              시험기간 도파민 테스트에 오신 것을 환영합니다. 본 테스트는
+              시험기간에 당신의 도파민 중독 수준을 측정하기 위해 설계되었습니다.{" "}
+              <strong>솔직하게</strong> 답변해 주세요. 테스트 결과는 재미를 위한
+              것이며, 어떠한 학술적 근거도 없습니다.
+              <p className="info-box-warn">
+                ※ 본 테스트를 진행하는 동안 뺏기는 시간은 측정됩니다.
+              </p>
             </div>
           </div>
           <div className="q-item">
-            <div className="q-label"><span className="q-num">1.</span><span>수험생의 <strong>학교 이름</strong>을 기입하시오.</span></div>
-            <input className="q-input" type="text" placeholder="예: OO고등학교, OO대학교" value={school} onChange={(e) => setSchool(e.target.value)} />
+            <div className="q-label">
+              <span className="q-num">1.</span>
+              <span>
+                수험생의 <strong>학교 이름</strong>을 기입하시오.
+              </span>
+            </div>
+            <input
+              className="q-input"
+              type="text"
+              placeholder="예: OO대학교"
+              value={school}
+              onChange={(e) => setSchool(e.target.value)}
+            />
           </div>
           <div className="q-item">
-            <div className="q-label"><span className="q-num">2.</span><span>수험생의 <strong>닉네임</strong>을 기입하시오.</span></div>
-            <input className="q-input" type="text" placeholder="닉네임을 입력하세요" value={nickname} onChange={(e) => setNickname(e.target.value)} />
+            <div className="q-label">
+              <span className="q-num">2.</span>
+              <span>
+                수험생의 <strong>닉네임</strong>을 기입하시오.
+              </span>
+            </div>
+            <input
+              className="q-input"
+              type="text"
+              placeholder="닉네임을 입력하세요"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+            />
           </div>
-          <button className="btn-next" onClick={goCategory}>다음 페이지로 →</button>
+          <button className="btn-next" onClick={goCategory}>
+            다음 페이지로 →
+          </button>
           <Footer cur={1} />
         </>
       )}
 
       {screen === "category" && (
         <>
-          <Header num={2} subjectHtml={"제 2 교시&nbsp;&nbsp;&nbsp;카테고리 선택"} />
+          <Header
+            num={2}
+            subjectHtml={"제 2 교시&nbsp;&nbsp;&nbsp;카테고리 선택"}
+          />
           <div className="info-box">
-            <div className="info-box-title">[안내문] 다음을 읽고, 카테고리를 선택하시오.</div>
+            <div className="info-box-title">
+              [안내문] 다음을 읽고, 카테고리를 선택하시오.
+            </div>
             <div className="info-box-body">
-              아래 3개의 카테고리 중 <strong>하나를 선택</strong>하시오. 카테고리 선택 순간부터 뺏기는 시간이 측정됩니다. 가장 솔직하게 자신을 대변하는 카테고리를 선택하세요.
+              아래 3개의 카테고리 중 <strong>하나를 선택</strong>하시오.
+              카테고리 선택 순간부터 뺏기는 시간이 측정됩니다. 가장 솔직하게
+              자신을 대변하는 카테고리를 선택하세요.
             </div>
           </div>
           <div className="category-grid">
-            <button className="category-btn" onClick={() => selectCategory("love")}>
+            <button
+              className="category-btn"
+              onClick={() => selectCategory("love")}
+            >
               <div className="cat-circle">①</div>
               <div className="cat-name">연애</div>
               <div className="cat-desc">연인 / 짝사랑 / 설렘</div>
             </button>
-            <button className="category-btn" onClick={() => selectCategory("study")}>
+            <button
+              className="category-btn"
+              onClick={() => selectCategory("study")}
+            >
               <div className="cat-circle">②</div>
               <div className="cat-name">공부</div>
               <div className="cat-desc">학습 / 집중 / 의지력</div>
             </button>
-            <button className="category-btn" onClick={() => selectCategory("life")}>
+            <button
+              className="category-btn"
+              onClick={() => selectCategory("life")}
+            >
               <div className="cat-circle">③</div>
               <div className="cat-name">생활</div>
               <div className="cat-desc">수면 / 식사 / 루틴</div>
@@ -548,18 +790,30 @@ export default function Home() {
       {screen === "studySpecial" && (
         <>
           <Header num={3} subjectHtml={"도파민 영역"} />
-          <div className="stolen-time">⏱ 지금까지 뺏긴 시간: {fmt(elapsed)}</div>
-          <div className="progress-bar"><div className="progress-bar-inner" style={{ width: "0%" }} /></div>
+          <div className="stolen-time">
+            ⏱ 지금까지 뺏긴 시간: {fmt(elapsed)}
+          </div>
+          <div className="progress-bar">
+            <div className="progress-bar-inner" style={{ width: "0%" }} />
+          </div>
           <div className="question-box">
             <div className="question-num-label">[사전 확인 문항]</div>
             <div className="question-text">{QUESTIONS.study.special.text}</div>
           </div>
           <div className="choices-list">
-            <button className="choice-btn" onClick={() => handleStudySpecial("continue")}>
-              <span className="choice-sym">①</span><span>{QUESTIONS.study.special.choices[0]}</span>
+            <button
+              className="choice-btn"
+              onClick={() => handleStudySpecial("continue")}
+            >
+              <span className="choice-sym">①</span>
+              <span>{QUESTIONS.study.special.choices[0]}</span>
             </button>
-            <button className="choice-btn" onClick={() => handleStudySpecial("exit")}>
-              <span className="choice-sym">②</span><span>{QUESTIONS.study.special.choices[1]}</span>
+            <button
+              className="choice-btn"
+              onClick={() => handleStudySpecial("exit")}
+            >
+              <span className="choice-sym">②</span>
+              <span>{QUESTIONS.study.special.choices[1]}</span>
             </button>
           </div>
           <Footer cur={3} />
@@ -570,23 +824,40 @@ export default function Home() {
         <>
           <Header num={questionPage} subjectHtml={"도파민 영역"} />
           <div className="q-meta-row">
-            <span>{currentNumber} / {totalQuestions} 문항</span>
+            <span>
+              {currentNumber} / {totalQuestions} 문항
+            </span>
             <span>{catLabel(category)} 카테고리</span>
           </div>
           <div className="progress-bar">
-            <div className="progress-bar-inner" style={{ width: `${questionPct}%` }} />
+            <div
+              className="progress-bar-inner"
+              style={{ width: `${questionPct}%` }}
+            />
           </div>
-          <div className="stolen-time">⏱ 지금까지 뺏긴 시간: {fmt(elapsed)}</div>
+          <div className="stolen-time">
+            ⏱ 지금까지 뺏긴 시간: {fmt(elapsed)}
+          </div>
           <div className="question-box">
             <div className="question-num-label">문항 {currentNumber}</div>
             <div className="question-text">{currentQuestion.text}</div>
           </div>
           <div className="choices-list">
-            <button className="choice-btn" onClick={() => handleAnswer(0)} disabled={answerLocked}>
-              <span className="choice-sym">①</span><span>{currentQuestion.choices[0]}</span>
+            <button
+              className="choice-btn"
+              onClick={() => handleAnswer(0)}
+              disabled={answerLocked}
+            >
+              <span className="choice-sym">①</span>
+              <span>{currentQuestion.choices[0]}</span>
             </button>
-            <button className="choice-btn" onClick={() => handleAnswer(1)} disabled={answerLocked}>
-              <span className="choice-sym">②</span><span>{currentQuestion.choices[1]}</span>
+            <button
+              className="choice-btn"
+              onClick={() => handleAnswer(1)}
+              disabled={answerLocked}
+            >
+              <span className="choice-sym">②</span>
+              <span>{currentQuestion.choices[1]}</span>
             </button>
           </div>
           <Footer cur={questionPage} />
@@ -596,10 +867,15 @@ export default function Home() {
       {screen === "loading" && (
         <>
           <div className="loading-wrap">
-            <div className="loading-subtitle">{loadingFinal ? "최종 결과를 분석하는 중..." : "중간 분석 중..."}</div>
+            <div className="loading-subtitle">
+              {loadingFinal ? "최종 결과를 분석하는 중..." : "중간 분석 중..."}
+            </div>
             <div className="loading-pct">{loadingPct}%</div>
             <div className="loading-bar-outer">
-              <div className="loading-bar-inner" style={{ width: `${loadingPct}%` }} />
+              <div
+                className="loading-bar-inner"
+                style={{ width: `${loadingPct}%` }}
+              />
             </div>
             <div className="loading-msg">{loadingMsg}</div>
           </div>
@@ -611,13 +887,18 @@ export default function Home() {
         <div className="warn-wrap">
           <div className="warn-main">공부하러 가세요.</div>
           <div className="warn-sub">지금 당장 책을 펴세요.</div>
-          <div className="warn-count">{warningCountdown}초 후 메인으로 이동합니다.</div>
+          <div className="warn-count">
+            {warningCountdown}초 후 메인으로 이동합니다.
+          </div>
         </div>
       )}
 
       {screen === "result" && result && category && (
         <>
-          <Header num={16} subjectHtml={"제 최종 교시&nbsp;&nbsp;&nbsp;결과 발표"} />
+          <Header
+            num={16}
+            subjectHtml={"제 최종 교시&nbsp;&nbsp;&nbsp;결과 발표"}
+          />
           <div className="result-type-box">
             <div className="result-code">{result.code}</div>
             <div className="result-name">{result.name}</div>
@@ -638,10 +919,15 @@ export default function Home() {
             </div>
           </div>
           <div className="ranking-section">
-            <div className="ranking-head">🏆 도파민 랭킹 TOP 5 (이 기기 기준)</div>
+            <div className="ranking-head">
+              🏆 도파민 랭킹 TOP 5 (이 기기 기준)
+            </div>
             {ranking.length > 0 ? (
               ranking.map((entry, index) => (
-                <div className={`ranking-row ${entry.ts === currentEntryTsRef.current ? "rank-me" : ""}`} key={`${entry.ts}-${index}`}>
+                <div
+                  className={`ranking-row ${entry.ts === currentEntryTsRef.current ? "rank-me" : ""}`}
+                  key={`${entry.ts}-${index}`}
+                >
                   <span className="rank-num">{index + 1}</span>
                   <span className="rank-info">
                     <span>{entry.nickname}</span>
@@ -654,11 +940,20 @@ export default function Home() {
               <div className="ranking-empty">아직 기록이 없습니다.</div>
             )}
           </div>
-          <button className="share-btn" onClick={() => void doShare(result.code, minutes)}>📋 결과 공유 문구 복사</button>
+          <button
+            className="share-btn"
+            onClick={() => void doShare(result.code, minutes)}
+          >
+            📋 결과 공유 문구 복사
+          </button>
           <div className="copy-msg">{copyMsg}</div>
           <div className="result-actions">
-            <button className="btn-act btn-white" onClick={resetCategoryScreen}>다른 카테고리 하기</button>
-            <button className="btn-act btn-black" onClick={resetHome}>메인으로</button>
+            <button className="btn-act btn-white" onClick={resetCategoryScreen}>
+              다른 카테고리 하기
+            </button>
+            <button className="btn-act btn-black" onClick={resetHome}>
+              메인으로
+            </button>
           </div>
           <Footer cur={16} />
         </>
