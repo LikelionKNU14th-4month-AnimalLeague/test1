@@ -335,7 +335,7 @@ function Header({ num, subjectHtml }: { num: number; subjectHtml: string }) {
     <>
       <div className="paper-top-bar">
         <span className="paper-meta">
-          2025학년도 시험기간 도파민테스트 문제지
+          2026학년도 시험기간 도파민 테스트 문제지
         </span>
         <span className="paper-big-num">{num}</span>
       </div>
@@ -355,7 +355,9 @@ function Header({ num, subjectHtml }: { num: number; subjectHtml: string }) {
 function Footer({ cur, total = 16 }: { cur: number; total?: number }) {
   return (
     <div className="paper-footer">
-      <span>* 이 문제지에 관한 저작권은 시험기간도파민테스트에 있습니다.</span>
+      <span>
+        * 이 문제지에 관한 저작권은 시험기간 도파민 테스트에 있습니다.
+      </span>
       <span>
         {cur} / {total}
       </span>
@@ -712,7 +714,7 @@ export default function Home() {
             <input
               className="q-input"
               type="text"
-              placeholder="예: OO고등학교, OO대학교"
+              placeholder="예: OO대학교"
               value={school}
               onChange={(e) => setSchool(e.target.value)}
             />
