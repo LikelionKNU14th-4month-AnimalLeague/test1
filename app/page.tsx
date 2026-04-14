@@ -352,15 +352,13 @@ function Header({ num, subjectHtml }: { num: number; subjectHtml: string }) {
   );
 }
 
-function Footer({ cur, total = 16 }: { cur: number; total?: number }) {
+function Footer({ cur, total }: { cur: number; total?: number }) {
   return (
     <div className="paper-footer">
       <span>
         * 이 문제지에 관한 저작권은 시험기간 도파민 테스트에 있습니다.
       </span>
-      <span>
-        {cur} / {total}
-      </span>
+      <span>{total != null ? `${cur} / ${total}` : `${cur}`}</span>
     </div>
   );
 }
@@ -817,7 +815,7 @@ export default function Home() {
               <span>{QUESTIONS.study.special.choices[1]}</span>
             </button>
           </div>
-          <Footer cur={3} />
+          <Footer cur={3} total={16} />
         </>
       )}
 
