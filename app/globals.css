@@ -162,7 +162,7 @@ body {
 .loading-wrap { padding: 20px; text-align: center; min-height: 900px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 .loading-subtitle { font-size: 12px; color: #888; margin-bottom: 36px; letter-spacing: 1px; }
 .loading-pct { font-size: 84px; font-weight: 800; line-height: 1; margin-bottom: 14px; }
-.loading-bar-outer { height: 14px; background: #e0e0e0; max-width: 460px; margin: 0 auto 30px; }
+.loading-bar-outer { height: 14px; background: #ccc; border: 1px solid #aaa; max-width: 460px; width: 100%; margin: 0 auto 30px; }
 .loading-bar-inner { height: 100%; background: #000; transition: width 0.35s ease; }
 .loading-msg { font-size: 15px; font-weight: 700; color: #333; min-height: 24px; }
 

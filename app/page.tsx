@@ -885,7 +885,7 @@ export default function Home() {
 
       {screen === "warning" && (
         <div className="warn-wrap">
-          <div className="warn-main">공부하러 가세요.</div>
+          <div className="warn-main">공부하러 가세요. </div>
           <div className="warn-sub">지금 당장 책을 펴세요.</div>
           <div className="warn-count">
             {warningCountdown}초 후 메인으로 이동합니다.
