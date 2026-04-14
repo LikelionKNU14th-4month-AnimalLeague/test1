@@ -668,6 +668,7 @@ export default function Home() {
   const questionPct = totalQuestions
     ? (currentNumber / totalQuestions) * 100
     : 0;
+  const totalPages = category === "study" ? 16 : 15;
   const questionPage =
     category === "study"
       ? 3 + currentNumber + (midLoadingDone ? 1 : 0)
@@ -860,7 +861,7 @@ export default function Home() {
               <span>{currentQuestion.choices[1]}</span>
             </button>
           </div>
-          <Footer cur={questionPage} />
+          <Footer cur={questionPage} total={totalPages} />
         </>
       )}
 
@@ -879,7 +880,7 @@ export default function Home() {
             </div>
             <div className="loading-msg">{loadingMsg}</div>
           </div>
-          <Footer cur={loadingPage} />
+          <Footer cur={loadingPage} total={totalPages} />
         </>
       )}
 
@@ -955,7 +956,7 @@ export default function Home() {
               메인으로
             </button>
           </div>
-          <Footer cur={16} />
+          <Footer cur={totalPages} total={totalPages} />
         </>
       )}
     </main>
