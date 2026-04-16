@@ -38,6 +38,8 @@ body {
 .paper-meta {
   font-size: 11.5px;
   color: #111;
+  user-select: none;
+  cursor: default;
 }
 .paper-big-num {
   font-size: 54px;
@@ -308,6 +310,8 @@ body {
   color: #888;
   margin-bottom: 20px;
   letter-spacing: 1px;
+  user-select: none;
+  cursor: default;
 }
 .loading-pct {
   font-size: 84px;
