@@ -13,6 +13,7 @@ type Screen =
   | "question"
   | "loading"
   | "warning"
+  | "nextCategory"
   | "result";
 
 type Question<T extends string = ResultType | SpecialType> = {
@@ -471,8 +472,12 @@ export default function Home() {
   const [schoolRanking, setSchoolRanking] = useState<DbRankingEntry[]>([]);
   const [copyMsg, setCopyMsg] = useState("");
   const [answerLocked, setAnswerLocked] = useState(false);
+  const [completedCategories, setCompletedCategories] = useState<Category[]>(
+    [],
+  );
   const currentEntryIdRef = useRef<string | null>(null);
   const resultSavedRef = useRef(false);
+  const completedCategoriesRef = useRef<Category[]>([]);
 
   useEffect(() => {
     const saved = JSON.parse(
@@ -486,7 +491,12 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (screen !== "question" && screen !== "studySpecial") {
+    if (
+      screen !== "question" &&
+      screen !== "studySpecial" &&
+      screen !== "loading" &&
+      screen !== "nextCategory"
+    ) {
       return;
     }
     if (startTime === null) {
@@ -524,7 +534,7 @@ export default function Home() {
     setLoadingPct(0);
     setLoadingMsg(LOADING_MESSAGES[0]);
 
-    const total = loadingFinal ? 20000 : 15000;
+    const total = loadingFinal ? 1000 : 1000;
     const waypoints = loadingFinal ? WAYPOINTS_FINAL : WAYPOINTS_MID;
     let elapsedMs = 0;
     let msgIdx = 0;
@@ -547,7 +557,15 @@ export default function Home() {
         window.clearInterval(timer);
         setLoadingPct(100);
         window.setTimeout(() => {
-          setScreen(loadingFinal ? "result" : "question");
+          if (loadingFinal) {
+            setScreen(
+              completedCategoriesRef.current.length >= 3
+                ? "result"
+                : "nextCategory",
+            );
+          } else {
+            setScreen("question");
+          }
         }, 600);
       }
     }, 100);
@@ -566,14 +584,15 @@ export default function Home() {
 
     const result = getResult();
     const minutes = toMinutes(elapsed);
+    const shortSchool = school.replace("대학교", "대");
 
     void (async () => {
       const { data, error } = await supabase
         .from("rankings")
         .insert({
-          school,
+          school: shortSchool,
           nickname,
-          category: catLabel(category),
+          category: completedCategoriesRef.current.map(catLabel).join(" · "),
           result_type: result.code,
           elapsed,
           minutes,
@@ -596,7 +615,7 @@ export default function Home() {
         supabase
           .from("rankings")
           .select("*")
-          .eq("school", school)
+          .eq("school", shortSchool)
           .order("elapsed", { ascending: false })
           .limit(5),
       ]);
@@ -675,6 +694,8 @@ export default function Home() {
     setSchoolRanking([]);
     setCopyMsg("");
     setAnswerLocked(false);
+    setCompletedCategories([]);
+    completedCategoriesRef.current = [];
     currentEntryIdRef.current = null;
     resultSavedRef.current = false;
     setScreen("category");
@@ -694,6 +715,18 @@ export default function Home() {
     setStartTime(Date.now());
     setAnswerLocked(false);
     setScreen(nextCategory === "study" ? "studySpecial" : "question");
+  }
+
+  function continueWithCategory(nextCat: Category) {
+    setCategory(nextCat);
+    setQuestions(
+      nextCat === "study" ? QUESTIONS.study.regular : QUESTIONS[nextCat],
+    );
+    setQIndex(0);
+    setAnswers([]);
+    setMidLoadingDone(false);
+    setAnswerLocked(false);
+    setScreen(nextCat === "study" ? "studySpecial" : "question");
   }
 
   function showLoading(isFinal: boolean) {
@@ -738,7 +771,11 @@ export default function Home() {
 
     if (qIndex === total - 1) {
       setQIndex((prev) => prev + 1);
-      setStartTime(null);
+      if (category) {
+        const newCompleted = [...completedCategoriesRef.current, category];
+        completedCategoriesRef.current = newCompleted;
+        setCompletedCategories(newCompleted);
+      }
       window.setTimeout(() => {
         setAnswerLocked(false);
         showLoading(true);
@@ -768,6 +805,8 @@ export default function Home() {
     setSchoolRanking([]);
     setCopyMsg("");
     setAnswerLocked(false);
+    setCompletedCategories([]);
+    completedCategoriesRef.current = [];
     currentEntryIdRef.current = null;
     resultSavedRef.current = false;
     setScreen("intro");
@@ -803,6 +842,9 @@ export default function Home() {
       : 8;
   const result = screen === "result" ? getResult() : null;
   const minutes = toMinutes(elapsed);
+  const remainingCategories = (["love", "study", "life"] as Category[]).filter(
+    (cat) => !completedCategories.includes(cat),
+  );
 
   return (
     <main id="paper">
@@ -1061,6 +1103,43 @@ export default function Home() {
         </div>
       )}
 
+      {screen === "nextCategory" && (
+        <div className="next-cat-wrap">
+          <div className="next-cat-stolen">
+            ⏱ 지금까지 총 뺏긴 시간: {fmt(elapsed)}
+          </div>
+          <div className="next-cat-prompt">
+            {remainingCategories.length === 1
+              ? "마지막 한 개 카테고리 있는데 이거 진짜 안보실거에요?"
+              : "다른 카테고리 질문도 재밌는데 궁금하지 않나요?"}
+          </div>
+          <div className="next-cat-grid">
+            {remainingCategories.map((cat, i) => (
+              <button
+                key={cat}
+                className="category-btn"
+                onClick={() => continueWithCategory(cat)}
+              >
+                <div className="cat-circle">{["①", "②", "③"][i]}</div>
+                <div className="cat-name">{catLabel(cat)}</div>
+                <div className="cat-desc">
+                  {
+                    {
+                      love: "연인 / 짝사랑 / 설렘",
+                      study: "학습 / 집중 / 의지력",
+                      life: "수면 / 식사 / 루틴",
+                    }[cat]
+                  }
+                </div>
+              </button>
+            ))}
+          </div>
+          <button className="btn-next" onClick={() => setScreen("result")}>
+            결과보기 →
+          </button>
+        </div>
+      )}
+
       {screen === "result" && result && category && (
         <>
           <Header
@@ -1140,10 +1219,10 @@ export default function Home() {
           </button>
           <div className="copy-msg">{copyMsg}</div>
           <div className="result-actions">
-            <button className="btn-act btn-white" onClick={resetCategoryScreen}>
-              다른 카테고리 하기
-            </button>
-            <button className="btn-act btn-black" onClick={resetHome}>
+            <button
+              className="btn-act btn-black btn-center"
+              onClick={resetHome}
+            >
               메인으로
             </button>
           </div>
