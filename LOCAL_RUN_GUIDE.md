@@ -103,14 +103,27 @@ cd /Users/Desktop/Github/test1
 
 ### 6-1. `.env.local` 파일 만들기
 
-프로젝트 최상위 폴더(예: `test1/`)에 `.env.local` 파일을 새로 만들고 아래 내용을 그대로 붙여넣습니다.
+프로젝트 최상위 폴더(예: `test1/`)에 `.env.local` 파일을 새로 만듭니다.
 
 ```
-NEXT_PUBLIC_SUPABASE_URL=https://sswvqdrqgolihhrwokyj.supabase.co
-NEXT_PUBLIC_SUPABASE_KEY=sb_publishable_UaAm30FBpBygAzW4-u1--A_Czgyf6bS
+NEXT_PUBLIC_SUPABASE_URL=여기에_프로젝트_URL_입력
+NEXT_PUBLIC_SUPABASE_KEY=여기에_프로젝트_공개키_입력
 ```
 
 이 파일은 보안상 GitHub에 올라가지 않으므로, 팀원 각자가 직접 만들어야 합니다.
+
+설정 방법:
+
+1. Supabase 프로젝트 대시보드에 접속합니다.
+2. `Project Settings` 또는 `Settings`로 이동합니다.
+3. `API` 항목에서 아래 2가지를 확인합니다.
+4. `Project URL` 값을 `NEXT_PUBLIC_SUPABASE_URL`에 넣습니다.
+5. 공개용 `anon` 또는 `publishable` 키를 `NEXT_PUBLIC_SUPABASE_KEY`에 넣습니다.
+
+주의:
+
+- `service_role` 키나 관리자 키는 여기에 넣으면 안 됩니다.
+- 브라우저에서 사용하는 공개용 키만 넣어야 합니다.
 
 ## 7. 필요한 파일 설치
 

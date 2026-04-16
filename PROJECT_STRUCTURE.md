@@ -143,6 +143,11 @@ NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_KEY=...
 ```
 
+주의:
+
+- 실제 값은 GitHub에 올리지 않고 각 팀원이 직접 설정합니다.
+- 여기에는 공개용 키만 들어가야 하며 `service_role` 키는 사용하지 않습니다.
+
 ### 4.4 `app/layout.tsx`
 
 앱 전체 공통 레이아웃을 담당합니다.
