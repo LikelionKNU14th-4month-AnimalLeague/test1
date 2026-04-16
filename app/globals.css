@@ -435,6 +435,15 @@ body {
   font-size: 11px;
   color: #888;
 }
+.rank-category {
+  font-size: 10px;
+  color: #fff;
+  background: #555;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
 .rank-time {
   font-weight: 700;
   color: #cc0000;
