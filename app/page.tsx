@@ -506,7 +506,7 @@ export default function Home() {
       return;
     }
     if (warningCountdown <= 0) {
-      resetHome();
+      resetCategoryScreen();
       return;
     }
 
@@ -593,20 +593,24 @@ export default function Home() {
           .from("rankings")
           .select("*")
           .order("elapsed", { ascending: false })
-          .limit(10),
+          .limit(5),
         supabase
           .from("rankings")
           .select("*")
           .eq("school", school)
           .order("elapsed", { ascending: false })
-          .limit(10),
+          .limit(5),
       ]);
 
-      if (globalRes.error) console.error("전체 랭킹 오류:", globalRes.error.message);
-      else if (globalRes.data) setGlobalRanking(globalRes.data as DbRankingEntry[]);
+      if (globalRes.error)
+        console.error("전체 랭킹 오류:", globalRes.error.message);
+      else if (globalRes.data)
+        setGlobalRanking(globalRes.data as DbRankingEntry[]);
 
-      if (schoolRes.error) console.error("학교 랭킹 오류:", schoolRes.error.message);
-      else if (schoolRes.data) setSchoolRanking(schoolRes.data as DbRankingEntry[]);
+      if (schoolRes.error)
+        console.error("학교 랭킹 오류:", schoolRes.error.message);
+      else if (schoolRes.data)
+        setSchoolRanking(schoolRes.data as DbRankingEntry[]);
     })();
   }, [screen]);
 
@@ -872,7 +876,14 @@ export default function Home() {
                 })()}
             </div>
             {schoolError && (
-              <p style={{ color: "#cc0000", fontSize: "12.5px", fontWeight: 700, marginTop: "6px" }}>
+              <p
+                style={{
+                  color: "#cc0000",
+                  fontSize: "12.5px",
+                  fontWeight: 700,
+                  marginTop: "6px",
+                }}
+              >
                 ※ 목록에 있는 학교명을 선택해 주세요.
               </p>
             )}
@@ -1046,7 +1057,7 @@ export default function Home() {
           <div className="warn-main">공부하러 가세요. </div>
           <div className="warn-sub">지금 당장 책을 펴세요.</div>
           <div className="warn-count">
-            {warningCountdown}초 후 메인으로 이동합니다.
+            {warningCountdown}초 후 카테고리 선택으로 이동합니다.
           </div>
         </div>
       )}
@@ -1079,7 +1090,7 @@ export default function Home() {
           <div className="ranking-section">
             <div className="ranking-cols">
               <div className="ranking-col">
-                <div className="ranking-head">🌍 전체 랭킹</div>
+                <div className="ranking-head">🌍 전체 랭킹 TOP 5</div>
                 {globalRanking.length > 0 ? (
                   globalRanking.map((entry, index) => (
                     <div
@@ -1099,7 +1110,7 @@ export default function Home() {
                 )}
               </div>
               <div className="ranking-col">
-                <div className="ranking-head">🏫 {school} 랭킹</div>
+                <div className="ranking-head">🏫 {school} 랭킹 TOP 5</div>
                 {schoolRanking.length > 0 ? (
                   schoolRanking.map((entry, index) => (
                     <div
