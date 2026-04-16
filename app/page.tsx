@@ -1110,7 +1110,7 @@ export default function Home() {
                 )}
               </div>
               <div className="ranking-col">
-                <div className="ranking-head">🏫 {school} 랭킹</div>
+                <div className="ranking-head">🏫 {school} 랭킹 TOP 5</div>
                 {schoolRanking.length > 0 ? (
                   schoolRanking.map((entry, index) => (
                     <div
