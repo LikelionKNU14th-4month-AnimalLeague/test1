@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { supabase, type DbRankingEntry } from "../lib/supabase";
 
 type Category = "love" | "study" | "life";
 type ResultType = "A" | "B";
@@ -26,16 +27,6 @@ type ResultEntry = {
   code: string;
   name: string;
   desc: string;
-};
-
-type RankingEntry = {
-  school: string;
-  nickname: string;
-  category: string;
-  code: string;
-  seconds: number;
-  minutes: number;
-  ts: number;
 };
 
 const LOADING_MESSAGES = [
@@ -352,21 +343,116 @@ function Header({ num, subjectHtml }: { num: number; subjectHtml: string }) {
   );
 }
 
-function Footer({ cur, total = 16 }: { cur: number; total?: number }) {
+const UNIVERSITIES: string[] = [
+  "강남대학교",
+  "건국대학교(서울캠퍼스)",
+  "건국대학교(GLOCAL캠퍼스)",
+  "경기대학교(수원캠퍼스)",
+  "경기대학교(서울캠퍼스)",
+  "경북대학교",
+  "경상국립대학교",
+  "경성대학교",
+  "경인교육대학교",
+  "경희대학교(서울캠퍼스)",
+  "경희대학교(국제캠퍼스)",
+  "계명대학교",
+  "고려대학교(서울캠퍼스)",
+  "고려대학교(세종캠퍼스)",
+  "공주대학교",
+  "광운대학교",
+  "국민대학교",
+  "군산대학교",
+  "단국대학교(죽전캠퍼스)",
+  "단국대학교(천안캠퍼스)",
+  "대구가톨릭대학교",
+  "대구대학교",
+  "대전대학교",
+  "덕성여자대학교",
+  "동국대학교(서울캠퍼스)",
+  "동국대학교(경주캠퍼스)",
+  "동덕여자대학교",
+  "동아대학교",
+  "동의대학교",
+  "목원대학교",
+  "목포대학교",
+  "명지대학교(서울캠퍼스)",
+  "명지대학교(자연캠퍼스)",
+  "부경대학교",
+  "부산대학교",
+  "삼육대학교",
+  "상명대학교(서울캠퍼스)",
+  "상명대학교(천안캠퍼스)",
+  "서강대학교",
+  "서울과학기술대학교",
+  "서울대학교",
+  "서울시립대학교",
+  "서울여자대학교",
+  "서울한양대학교",
+  "성결대학교",
+  "성균관대학교(인문사회과학캠퍼스)",
+  "성균관대학교(자연과학캠퍼스)",
+  "성신여자대학교",
+  "세종대학교",
+  "숙명여자대학교",
+  "숭실대학교",
+  "아주대학교",
+  "안양대학교",
+  "연세대학교(신촌캠퍼스)",
+  "연세대학교(미래캠퍼스)",
+  "영남대학교",
+  "용인대학교",
+  "우석대학교",
+  "원광대학교",
+  "을지대학교(성남캠퍼스)",
+  "을지대학교(대전캠퍼스)",
+  "이화여자대학교",
+  "인하대학교",
+  "인천대학교",
+  "전남대학교",
+  "전북대학교",
+  "제주대학교",
+  "조선대학교",
+  "중앙대학교(서울캠퍼스)",
+  "중앙대학교(안성캠퍼스)",
+  "차의과학대학교",
+  "청주대학교",
+  "충남대학교",
+  "충북대학교",
+  "한경국립대학교",
+  "한국교원대학교",
+  "한국교통대학교",
+  "한국외국어대학교(서울캠퍼스)",
+  "한국외국어대학교(글로벌캠퍼스)",
+  "한국항공대학교",
+  "한림대학교",
+  "한성대학교",
+  "한신대학교",
+  "한양대학교(서울캠퍼스)",
+  "한양대학교(ERICA캠퍼스)",
+  "홍익대학교(서울캠퍼스)",
+  "홍익대학교(세종캠퍼스)",
+  "KAIST",
+  "POSTECH",
+  "DGIST",
+  "GIST",
+  "UNIST",
+];
+
+function Footer({ cur, total }: { cur: number; total?: number }) {
   return (
     <div className="paper-footer">
       <span>
         * 이 문제지에 관한 저작권은 시험기간 도파민 테스트에 있습니다.
       </span>
-      <span>
-        {cur} / {total}
-      </span>
+      <span>{total != null ? `${cur} / ${total}` : `${cur}`}</span>
     </div>
   );
 }
 
 export default function Home() {
   const [school, setSchool] = useState("");
+  const [showSchoolSuggestions, setShowSchoolSuggestions] = useState(false);
+  const [schoolError, setSchoolError] = useState(false);
   const [nickname, setNickname] = useState("");
   const [category, setCategory] = useState<Category | null>(null);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -382,10 +468,11 @@ export default function Home() {
     (typeof LOADING_MESSAGES)[number]
   >(LOADING_MESSAGES[0]);
   const [loadingFinal, setLoadingFinal] = useState(false);
-  const [ranking, setRanking] = useState<RankingEntry[]>([]);
+  const [globalRanking, setGlobalRanking] = useState<DbRankingEntry[]>([]);
+  const [schoolRanking, setSchoolRanking] = useState<DbRankingEntry[]>([]);
   const [copyMsg, setCopyMsg] = useState("");
   const [answerLocked, setAnswerLocked] = useState(false);
-  const currentEntryTsRef = useRef<number | null>(null);
+  const currentEntryIdRef = useRef<string | null>(null);
   const resultSavedRef = useRef(false);
 
   useEffect(() => {
@@ -419,7 +506,7 @@ export default function Home() {
       return;
     }
     if (warningCountdown <= 0) {
-      resetHome();
+      resetCategoryScreen();
       return;
     }
 
@@ -480,24 +567,51 @@ export default function Home() {
 
     const result = getResult();
     const minutes = toMinutes(elapsed);
-    const entry: RankingEntry = {
-      school,
-      nickname,
-      category: catLabel(category),
-      code: result.code,
-      seconds: elapsed,
-      minutes,
-      ts: Date.now(),
-    };
-    currentEntryTsRef.current = entry.ts;
 
-    const list = JSON.parse(
-      window.localStorage.getItem("animal_rankings") || "[]",
-    ) as RankingEntry[];
-    list.push(entry);
-    list.sort((a, b) => b.seconds - a.seconds);
-    window.localStorage.setItem("animal_rankings", JSON.stringify(list));
-    setRanking(list.slice(0, 5));
+    void (async () => {
+      const { data, error } = await supabase
+        .from("rankings")
+        .insert({
+          school,
+          nickname,
+          category: catLabel(category),
+          result_type: result.code,
+          elapsed,
+          minutes,
+        })
+        .select("id")
+        .single();
+
+      if (error) {
+        console.error("insert 오류:", error.message);
+      } else if (data) {
+        currentEntryIdRef.current = data.id as string;
+      }
+
+      const [globalRes, schoolRes] = await Promise.all([
+        supabase
+          .from("rankings")
+          .select("*")
+          .order("elapsed", { ascending: false })
+          .limit(5),
+        supabase
+          .from("rankings")
+          .select("*")
+          .eq("school", school)
+          .order("elapsed", { ascending: false })
+          .limit(5),
+      ]);
+
+      if (globalRes.error)
+        console.error("전체 랭킹 오류:", globalRes.error.message);
+      else if (globalRes.data)
+        setGlobalRanking(globalRes.data as DbRankingEntry[]);
+
+      if (schoolRes.error)
+        console.error("학교 랭킹 오류:", schoolRes.error.message);
+      else if (schoolRes.data)
+        setSchoolRanking(schoolRes.data as DbRankingEntry[]);
+    })();
   }, [screen]);
 
   useEffect(() => {
@@ -535,6 +649,12 @@ export default function Home() {
       return;
     }
 
+    if (!UNIVERSITIES.includes(nextSchool)) {
+      setSchoolError(true);
+      return;
+    }
+
+    setSchoolError(false);
     setSchool(nextSchool);
     setNickname(nextNickname);
     saveUser(nextSchool, nextNickname);
@@ -552,10 +672,11 @@ export default function Home() {
     setLoadingPct(0);
     setLoadingMsg(LOADING_MESSAGES[0]);
     setLoadingFinal(false);
-    setRanking([]);
+    setGlobalRanking([]);
+    setSchoolRanking([]);
     setCopyMsg("");
     setAnswerLocked(false);
-    currentEntryTsRef.current = null;
+    currentEntryIdRef.current = null;
     resultSavedRef.current = false;
     setScreen("category");
   }
@@ -644,10 +765,11 @@ export default function Home() {
     setLoadingPct(0);
     setLoadingMsg(LOADING_MESSAGES[0]);
     setLoadingFinal(false);
-    setRanking([]);
+    setGlobalRanking([]);
+    setSchoolRanking([]);
     setCopyMsg("");
     setAnswerLocked(false);
-    currentEntryTsRef.current = null;
+    currentEntryIdRef.current = null;
     resultSavedRef.current = false;
     setScreen("intro");
   }
@@ -668,6 +790,7 @@ export default function Home() {
   const questionPct = totalQuestions
     ? (currentNumber / totalQuestions) * 100
     : 0;
+  const totalPages = category === "study" ? 16 : 15;
   const questionPage =
     category === "study"
       ? 3 + currentNumber + (midLoadingDone ? 1 : 0)
@@ -711,13 +834,59 @@ export default function Home() {
                 수험생의 <strong>학교 이름</strong>을 기입하시오.
               </span>
             </div>
-            <input
-              className="q-input"
-              type="text"
-              placeholder="예: OO대학교"
-              value={school}
-              onChange={(e) => setSchool(e.target.value)}
-            />
+            <div style={{ position: "relative" }}>
+              <input
+                className="q-input"
+                type="text"
+                placeholder="예: OO대학교"
+                value={school}
+                autoComplete="off"
+                onChange={(e) => {
+                  setSchool(e.target.value);
+                  setShowSchoolSuggestions(true);
+                  setSchoolError(false);
+                }}
+                onFocus={() => setShowSchoolSuggestions(true)}
+                onBlur={() =>
+                  setTimeout(() => setShowSchoolSuggestions(false), 150)
+                }
+              />
+              {showSchoolSuggestions &&
+                school.trim().length > 0 &&
+                (() => {
+                  const suggestions = UNIVERSITIES.filter((u) =>
+                    u.includes(school.trim()),
+                  ).slice(0, 8);
+                  return suggestions.length > 0 ? (
+                    <div className="school-suggestions">
+                      {suggestions.map((u) => (
+                        <button
+                          key={u}
+                          className="school-suggestion-item"
+                          onMouseDown={() => {
+                            setSchool(u);
+                            setShowSchoolSuggestions(false);
+                          }}
+                        >
+                          {u}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null;
+                })()}
+            </div>
+            {schoolError && (
+              <p
+                style={{
+                  color: "#cc0000",
+                  fontSize: "12.5px",
+                  fontWeight: 700,
+                  marginTop: "6px",
+                }}
+              >
+                ※ 목록에 있는 학교명을 선택해 주세요.
+              </p>
+            )}
           </div>
           <div className="q-item">
             <div className="q-label">
@@ -816,7 +985,7 @@ export default function Home() {
               <span>{QUESTIONS.study.special.choices[1]}</span>
             </button>
           </div>
-          <Footer cur={3} />
+          <Footer cur={3} total={16} />
         </>
       )}
 
@@ -860,7 +1029,7 @@ export default function Home() {
               <span>{currentQuestion.choices[1]}</span>
             </button>
           </div>
-          <Footer cur={questionPage} />
+          <Footer cur={questionPage} total={totalPages} />
         </>
       )}
 
@@ -879,16 +1048,16 @@ export default function Home() {
             </div>
             <div className="loading-msg">{loadingMsg}</div>
           </div>
-          <Footer cur={loadingPage} />
+          <Footer cur={loadingPage} total={totalPages} />
         </>
       )}
 
       {screen === "warning" && (
         <div className="warn-wrap">
-          <div className="warn-main">공부하러 가세요.</div>
+          <div className="warn-main">공부하러 가세요. </div>
           <div className="warn-sub">지금 당장 책을 펴세요.</div>
           <div className="warn-count">
-            {warningCountdown}초 후 메인으로 이동합니다.
+            {warningCountdown}초 후 카테고리 선택으로 이동합니다.
           </div>
         </div>
       )}
@@ -915,30 +1084,52 @@ export default function Home() {
             </div>
             <div className="meta-card">
               <div className="meta-label">뺏긴 시험시간</div>
-              <div className="meta-value stolen-red">{minutes}분</div>
+              <div className="meta-value stolen-red">{fmt(elapsed)}</div>
             </div>
           </div>
           <div className="ranking-section">
-            <div className="ranking-head">
-              🏆 도파민 랭킹 TOP 5 (이 기기 기준)
+            <div className="ranking-cols">
+              <div className="ranking-col">
+                <div className="ranking-head">🌍 전체 랭킹 TOP 5</div>
+                {globalRanking.length > 0 ? (
+                  globalRanking.map((entry, index) => (
+                    <div
+                      className={`ranking-row ${entry.id === currentEntryIdRef.current ? "rank-me" : ""}`}
+                      key={entry.id}
+                    >
+                      <span className="rank-num">{index + 1}</span>
+                      <span className="rank-info">
+                        <span>{entry.nickname}</span>
+                        <span className="rank-school">({entry.school})</span>
+                      </span>
+                      <span className="rank-time">{fmt(entry.elapsed)}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="ranking-empty">아직 기록이 없습니다.</div>
+                )}
+              </div>
+              <div className="ranking-col">
+                <div className="ranking-head">🏫 {school} 랭킹 TOP 5</div>
+                {schoolRanking.length > 0 ? (
+                  schoolRanking.map((entry, index) => (
+                    <div
+                      className={`ranking-row ${entry.id === currentEntryIdRef.current ? "rank-me" : ""}`}
+                      key={entry.id}
+                    >
+                      <span className="rank-num">{index + 1}</span>
+                      <span className="rank-info">
+                        <span>{entry.nickname}</span>
+                        <span className="rank-school">({entry.school})</span>
+                      </span>
+                      <span className="rank-time">{fmt(entry.elapsed)}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="ranking-empty">아직 기록이 없습니다.</div>
+                )}
+              </div>
             </div>
-            {ranking.length > 0 ? (
-              ranking.map((entry, index) => (
-                <div
-                  className={`ranking-row ${entry.ts === currentEntryTsRef.current ? "rank-me" : ""}`}
-                  key={`${entry.ts}-${index}`}
-                >
-                  <span className="rank-num">{index + 1}</span>
-                  <span className="rank-info">
-                    <span>{entry.nickname}</span>
-                    <span className="rank-school">({entry.school})</span>
-                  </span>
-                  <span className="rank-time">{entry.minutes}분</span>
-                </div>
-              ))
-            ) : (
-              <div className="ranking-empty">아직 기록이 없습니다.</div>
-            )}
           </div>
           <button
             className="share-btn"
@@ -955,7 +1146,7 @@ export default function Home() {
               메인으로
             </button>
           </div>
-          <Footer cur={16} />
+          <Footer cur={totalPages} total={totalPages} />
         </>
       )}
     </main>

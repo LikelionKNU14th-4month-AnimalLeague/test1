@@ -96,7 +96,36 @@ pnpm -v
 cd /Users/Desktop/Github/test1
 ```
 
-## 6. 필요한 파일 설치
+## 6. 환경 변수 파일 설정
+
+이 프로젝트는 Supabase(데이터베이스)를 사용합니다.
+실행 전에 프로젝트 루트 폴더에 `.env.local` 파일을 직접 만들어야 합니다.
+
+### 6-1. `.env.local` 파일 만들기
+
+프로젝트 최상위 폴더(예: `test1/`)에 `.env.local` 파일을 새로 만듭니다.
+
+```
+NEXT_PUBLIC_SUPABASE_URL=여기에_프로젝트_URL_입력
+NEXT_PUBLIC_SUPABASE_KEY=여기에_프로젝트_공개키_입력
+```
+
+이 파일은 보안상 GitHub에 올라가지 않으므로, 팀원 각자가 직접 만들어야 합니다.
+
+설정 방법:
+
+1. Supabase 프로젝트 대시보드에 접속합니다.
+2. `Project Settings` 또는 `Settings`로 이동합니다.
+3. `API` 항목에서 아래 2가지를 확인합니다.
+4. `Project URL` 값을 `NEXT_PUBLIC_SUPABASE_URL`에 넣습니다.
+5. 공개용 `anon` 또는 `publishable` 키를 `NEXT_PUBLIC_SUPABASE_KEY`에 넣습니다.
+
+주의:
+
+- `service_role` 키나 관리자 키는 여기에 넣으면 안 됩니다.
+- 브라우저에서 사용하는 공개용 키만 넣어야 합니다.
+
+## 7. 필요한 파일 설치
 
 프로젝트 폴더에 들어간 뒤 아래 명령어를 입력합니다.
 
@@ -106,7 +135,7 @@ pnpm install
 
 이 과정은 처음 한 번은 시간이 조금 걸릴 수 있습니다.
 
-## 7. 프로젝트 실행
+## 8. 프로젝트 실행
 
 아래 명령어를 입력합니다.
 
@@ -122,13 +151,13 @@ http://localhost:3000
 
 브라우저에서 그 주소를 열면 됩니다.
 
-## 8. 실행 후 확인 방법
+## 9. 실행 후 확인 방법
 
 1. 브라우저에서 `http://localhost:3000` 열기
 2. 화면이 보이면 정상 실행
 3. 종료하려면 터미널에서 `Ctrl + C`
 
-## 9. 다시 실행할 때
+## 10. 다시 실행할 때
 
 처음 설치 이후에는 아래 순서로 하면 됩니다.
 
@@ -148,7 +177,7 @@ cd /Users/Desktop/Github/test1
 pnpm dev
 ```
 
-## 10. 자주 있는 문제
+## 11. 자주 있는 문제
 
 ### `pnpm: command not found`
 
@@ -238,9 +267,12 @@ http://localhost:3001
 2. 다른 브라우저로 열기
 3. 인터넷 연결 확인
 
-## 11. 가장 간단한 실행 순서 요약
+## 12. 가장 간단한 실행 순서 요약
 
 아래 순서만 기억하면 됩니다.
+
+1. 프로젝트 루트에 `.env.local` 파일 생성 후 Supabase 값 붙여넣기
+2. 터미널에서 아래 명령어 실행
 
 ```bash
 cd /Users/Desktop/Github/test1
