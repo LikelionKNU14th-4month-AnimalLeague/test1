@@ -27,6 +27,13 @@ body {
   position: relative;
   display: flex;
   flex-direction: column;
+  cursor: default;
+  user-select: none;
+}
+
+#paper input {
+  user-select: text;
+  cursor: text;
 }
 
 .paper-top-bar {
@@ -38,8 +45,6 @@ body {
 .paper-meta {
   font-size: 11.5px;
   color: #111;
-  user-select: none;
-  cursor: default;
 }
 .paper-big-num {
   font-size: 54px;
@@ -232,11 +237,13 @@ body {
   height: 5px;
   background: #ddd;
   margin-bottom: 14px;
+  overflow: hidden;
 }
 .progress-bar-inner {
   height: 100%;
   background: #000;
   transition: width 0.3s;
+  will-change: width;
 }
 .stolen-time {
   text-align: center;
@@ -310,8 +317,6 @@ body {
   color: #888;
   margin-bottom: 20px;
   letter-spacing: 1px;
-  user-select: none;
-  cursor: default;
 }
 .loading-pct {
   font-size: 84px;
@@ -326,11 +331,13 @@ body {
   max-width: 460px;
   width: 100%;
   margin: 0 auto 30px;
+  overflow: hidden;
 }
 .loading-bar-inner {
   height: 100%;
   background: #000;
   transition: width 0.35s ease;
+  will-change: width;
 }
 .loading-msg {
   font-size: 15px;
