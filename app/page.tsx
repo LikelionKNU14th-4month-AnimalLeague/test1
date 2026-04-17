@@ -543,6 +543,11 @@ export default function Home() {
       return;
     }
 
+    const SPECIAL_DROP_MESSAGE = "로딩바가 80%까지 갔다가 마음을 바꿨습니다.";
+    const ELIGIBLE_MESSAGES = LOADING_MESSAGES.filter(
+      (m) => m !== SPECIAL_DROP_MESSAGE,
+    );
+
     setLoadingPct(0);
     setLoadingMsg(
       loadingFinal && completedCategoriesRef.current.length >= 3
@@ -554,19 +559,33 @@ export default function Home() {
     const waypoints = loadingFinal ? WAYPOINTS_FINAL : WAYPOINTS_MID;
     let elapsedMs = 0;
     let msgIdx = 0;
+    let prevPct = 0;
+    let reached80 = false;
+    let specialShown = false;
 
     const timer = window.setInterval(() => {
       elapsedMs += 100;
       const pct = interpPct(elapsedMs, waypoints);
       setLoadingPct(pct);
 
+      // Show the "80% then changed mind" message only if the bar actually reached >=80
+      // and then dropped afterwards (waypoint fake-out behavior).
+      if (!specialShown) {
+        if (pct >= 80) reached80 = true;
+        if (reached80 && pct < prevPct && pct < 80) {
+          setLoadingMsg(SPECIAL_DROP_MESSAGE);
+          specialShown = true;
+        }
+      }
+      prevPct = pct;
+
       if (elapsedMs % 1800 === 0) {
         let nextIdx;
         do {
-          nextIdx = Math.floor(Math.random() * LOADING_MESSAGES.length);
+          nextIdx = Math.floor(Math.random() * ELIGIBLE_MESSAGES.length);
         } while (nextIdx === msgIdx);
         msgIdx = nextIdx;
-        setLoadingMsg(LOADING_MESSAGES[msgIdx]);
+        setLoadingMsg(ELIGIBLE_MESSAGES[msgIdx] ?? LOADING_MESSAGES[0]);
       }
 
       if (elapsedMs >= total) {
