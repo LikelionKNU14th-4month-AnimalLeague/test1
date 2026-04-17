@@ -373,24 +373,20 @@ body {
 .result-type-box {
   text-align: center;
   border: 2px solid #000;
-  padding: 14px;
-  margin-bottom: 10px;
-}
-.result-code {
-  font-size: 26px;
-  font-weight: 800;
-  letter-spacing: 3px;
-  margin-bottom: 6px;
+  padding: 24px 20px;
+  margin-bottom: 18px;
 }
 .result-name {
-  font-size: 19px;
-  font-weight: 700;
-  margin-bottom: 8px;
+  font-size: 21px;
+  font-weight: 800;
+  margin-bottom: 14px;
+  letter-spacing: 0.5px;
 }
 .result-desc {
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 13.5px;
+  line-height: 1.85;
   color: #222;
+  text-align: left;
 }
 .result-meta-grid {
   display: grid;
@@ -408,7 +404,7 @@ body {
   margin-bottom: 3px;
 }
 .meta-value {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
 }
 .stolen-red {
@@ -416,19 +412,19 @@ body {
 }
 
 .ranking-head {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 800;
   border-bottom: 2px solid #000;
-  padding-bottom: 6px;
-  margin-bottom: 8px;
+  padding-bottom: 7px;
+  margin-bottom: 9px;
 }
 .ranking-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 5px 2px;
+  padding: 8px 2px;
   border-bottom: 1px solid #eee;
-  font-size: 13px;
+  font-size: 13.5px;
 }
 .rank-num {
   font-weight: 800;
@@ -437,13 +433,17 @@ body {
 }
 .rank-info {
   flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .rank-school {
   font-size: 11px;
   color: #888;
 }
 .rank-category {
-  font-size: 10px;
+  font-size: 10.5px;
   color: #fff;
   background: #555;
   padding: 1px 5px;
@@ -453,11 +453,18 @@ body {
 }
 .rank-time {
   font-weight: 700;
+  font-size: 13.5px;
   color: #cc0000;
 }
 .rank-me {
   background: #fffde7;
 }
+.rank-top-1 { background: #fff3c4; }
+.rank-top-2 { background: #ebebeb; }
+.rank-top-3 { background: #ffe8d6; }
+.rank-top-1 .rank-num { color: #b8860b; font-size: 15px; }
+.rank-top-2 .rank-num { color: #666; font-size: 15px; }
+.rank-top-3 .rank-num { color: #8b4513; font-size: 15px; }
 .ranking-empty {
   font-size: 13px;
   color: #aaa;
@@ -550,16 +557,31 @@ body {
   min-width: 160px;
 }
 
+.result-copyright {
+  border-top: 1px solid #000;
+  padding-top: 8px;
+  margin-top: 10px;
+  font-size: 11px;
+  color: #222;
+}
+
 .ranking-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   margin-bottom: 10px;
 }
 .ranking-cols {
+  flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 .ranking-col {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 @media (max-width: 640px) {

@@ -89,9 +89,10 @@ intro
 → category
 → studySpecial (공부 카테고리 선택 시만)
 → question
-→ loading
+→ loading (중간)
 → question
-→ loading
+→ loading (최종)
+→ nextCategory (1~2개 완료 시) → 추가 카테고리 선택 or 결과보기
 → result
 ```
 
@@ -102,6 +103,8 @@ studySpecial
 → warning
 → category
 ```
+
+멀티 카테고리: 사용자는 1~3개의 카테고리를 선택할 수 있으며, 카테고리 선택 시점부터 결과 확인 전까지 타이머가 연속으로 동작합니다.
 
 ### 4.2 `lib/supabase.ts`
 
@@ -272,8 +275,9 @@ TypeScript 컴파일 옵션을 담당합니다.
 3. `studySpecial` — 공부 카테고리 사전 확인 문항
 4. `question` — 질문 화면
 5. `loading` — 중간 / 최종 로딩 화면
-6. `warning` — 공부하러가세요 경고 화면
-7. `result` — 최종 결과 및 랭킹 화면
+6. `warning` — 공부하러 가세요 경고 화면
+7. `nextCategory` — 추가 카테고리 선택 또는 결과보기 화면 (1~2개 완료 시)
+8. `result` — 최종 결과 및 랭킹 화면
 
 즉, 화면별 컴포넌트를 파일로 나누지 않고 하나의 페이지 파일에서 분기하는 구조입니다.
 
@@ -287,16 +291,16 @@ TypeScript 컴파일 옵션을 담당합니다.
 
 - `LOADING_MESSAGES`
 - `QUESTIONS`
-- `RESULTS`
-- `WAYPOINTS`
+- `COMPLETION_RESULTS`
+- `WAYPOINTS_MID` / `WAYPOINTS_FINAL`
 - `UNIVERSITIES`
 
 설명:
 
-- `LOADING_MESSAGES`: 로딩 화면 문구 배열
+- `LOADING_MESSAGES`: 로딩 화면 문구 배열 (34개)
 - `QUESTIONS`: 카테고리별 질문/선택지/결과 타입 정보
-- `RESULTS`: 카테고리별 최종 결과 정보
-- `WAYPOINTS`: 로딩 퍼센트 애니메이션 계산용 기준값
+- `COMPLETION_RESULTS`: 완료한 카테고리 수(1~3)에 따른 결과 정보 (각 2개 후보, 랜덤 선택)
+- `WAYPOINTS_MID` / `WAYPOINTS_FINAL`: 중간/최종 로딩 퍼센트 애니메이션 계산용 기준값
 - `UNIVERSITIES`: 학교 자동완성에 사용되는 국내 대학교 목록 (캠퍼스 구분 포함)
 
 ---
@@ -327,11 +331,14 @@ TypeScript 컴파일 옵션을 담당합니다.
 - `schoolRanking` — 학교별 랭킹 데이터 (Supabase)
 - `copyMsg` — 공유 문구 복사 완료 메시지
 - `answerLocked` — 답변 중복 클릭 방지
+- `completedCategories` — 완료한 카테고리 목록
 
 보조 `ref`:
 
 - `currentEntryIdRef` — 현재 사용자의 Supabase 행 id (랭킹 강조 표시용)
 - `resultSavedRef` — 결과 중복 저장 방지 플래그
+- `completedCategoriesRef` — 로딩 interval 클로저 내 안전한 카테고리 목록 접근용
+- `resultVariantRef` — 결과 후보 랜덤 인덱스 (0 또는 1)
 
 ---
 
@@ -348,6 +355,7 @@ TypeScript 컴파일 옵션을 담당합니다.
 - 결과 화면 진입 시 테스트 기록을 Supabase `rankings` 테이블에 저장합니다.
 - 저장 후 전체 랭킹 TOP 5, 해당 학교 랭킹 TOP 5를 불러와 화면에 표시합니다.
 - 다른 사용자의 기록도 실시간으로 확인 가능합니다.
+- 학교명은 "대학교"를 "대"로 단축해서 저장합니다 (예: 건국대학교 → 건국대).
 
 저장 컬럼:
 
@@ -356,8 +364,8 @@ TypeScript 컴파일 옵션을 담당합니다.
 | `id` | 행 고유 ID |
 | `nickname` | 사용자 닉네임 |
 | `school` | 학교명 |
-| `category` | 카테고리 (연애 / 공부 / 생활) |
-| `result_type` | 결과 코드 (예: LOVE-ADDICT) |
+| `category` | 완료한 카테고리 목록 (예: 연애 · 공부 · 생활) |
+| `result_type` | 결과 이름 (예: 전 과목 낙제 확정형) |
 | `elapsed` | 경과 시간 (초) |
 | `minutes` | 경과 시간 (분, 올림) |
 | `created_at` | 기록 생성 시각 |
