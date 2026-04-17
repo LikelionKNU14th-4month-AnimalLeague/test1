@@ -24,8 +24,7 @@ type Question<T extends string = ResultType | SpecialType> = {
 
 type QuizQuestion = Question<ResultType>;
 
-type ResultEntry = {
-  code: string;
+type CompletionResultEntry = {
   name: string;
   desc: string;
 };
@@ -238,43 +237,40 @@ const QUESTIONS: Record<Exclude<Category, "study">, QuizQuestion[]> & {
   ],
 };
 
-const RESULTS: Record<Category, Record<ResultType, ResultEntry>> = {
-  love: {
-    A: {
-      code: "LOVE-REALIST",
-      name: "현실을 아는 냉철한 연인형",
-      desc: "시험 기간만큼은 공부가 먼저라는 걸 아는 당신. 연락이 와도 참을 수 있고, 감정보다 성적을 선택합니다. 속으로는 보고 싶겠지만... 그게 진짜 성숙한 사랑 아닐까요? 시험 끝나고 실컷 연애하세요.",
+const COMPLETION_RESULTS: Record<
+  1 | 2 | 3,
+  [CompletionResultEntry, CompletionResultEntry]
+> = {
+  1: [
+    {
+      name: "간만 보는 갓생 호소인",
+      desc: "오, 아직 이성이 남아있으시군요? 딱 하나만 해보고 다시 공부하러 가려는 그 갸륵한 마음... 하지만 이미 도파민의 맛을 보셨네요. 하나 더 하면 오늘 공부는 끝인 거 아시죠?",
     },
-    B: {
-      code: "LOVE-ADDICT",
-      name: "사랑에 빠진 도파민 중독형",
-      desc: "시험 기간에도 연애가 최우선. 메시지 하나에 집중력이 무너지고, 상대방 생각에 문제도 안 읽힙니다. 공부보다 감정이 먼저인 당신, 뺏긴 시험시간만큼 성적이 아프겠지만... 그래도 사랑이 예쁘긴 하네요.",
+    {
+      name: "미련 가득한 모범생",
+      desc: "일단 테스트 하나는 해보셨네요. '이것만 보고 진짜 공부해야지'라고 생각 중이죠? 그 미련이 당신을 도파민의 늪으로 인도할 거예요. 다른 카테고리도 맛 보는 순간, 오늘 복습은 물 건너갑니다.",
     },
-  },
-  study: {
-    A: {
-      code: "EXAM-WARRIOR",
-      name: "의외로 열심히 하는 공부형",
-      desc: "테스트도 했는데 공부도 하고 있다고요? 대단합니다. 계획도 세우고, 범위도 파악하고, 집중 시간도 길고. 이 테스트 하는 동안 뺏긴 시간이 아깝지만, 당신은 잘 하고 있어요. 파이팅.",
+  ],
+  2: [
+    {
+      name: "본격적인 현실 도피형",
+      desc: "어라? 하나만 한다더니 자연스럽게 다음 카테고리로 넘어오셨네요. 이제 슬슬 책상 앞이 아니라 테스트 결과 창이 내 집처럼 편안하시죠? 절반 넘게 오신 김에 마지막까지 찍고 '공부 포기 선언' 하실 건가요?",
     },
-    B: {
-      code: "DOPAMINE-LOOP",
-      name: "시험기간 도파민 루프형",
-      desc: "공부해야 한다는 걸 알면서도 계속 딴짓. 유튜브, 테스트, SNS... 무한 루프 중입니다. 이 결과 보고 진짜 공부 시작하세요. 지금 당장. 이 결과 캡처하는 시간도 사실 낭비입니다.",
+    {
+      name: "의지박약 도파민 수집가",
+      desc: "오호, 하나로 끝내기엔 역시 아쉬우셨나 봐요? '이것까지만 하고 진짜 공부한다'라는 거짓말을 스스로에게 하고 계시군요. 벌써 두 카테고리나 정복하신 걸 보니, 이미 머릿속에 전공 지식은 사라지고 테스트 결과만 남으셨네요.",
     },
-  },
-  life: {
-    A: {
-      code: "LIFE-MANAGER",
-      name: "루틴 지키는 생활 관리형",
-      desc: "시험 기간에도 규칙적인 생활을 유지하는 당신. 밥도 챙겨 먹고, 일찍 자고, 방도 깔끔하고. 이런 분이 결국 성적도 잘 나오더라고요. 계속 이 페이스 유지하세요. 진짜 대단합니다.",
+  ],
+  3: [
+    {
+      name: "전 과목 낙제 확정형",
+      desc: "축하합니다! 세 가지 카테고리를 다 보셨군요? 공부 빼고 다 재밌는 그 마음 이해는 하지만... 뺏긴 시간만큼 성적이 아프게 다가올 거예요. 그래도 테스트는 재밌었죠?",
     },
-    B: {
-      code: "LIFE-CHAOS",
-      name: "시험기간 생활 붕괴형",
-      desc: "수면도, 식사도, 운동도 전부 포기. 시험 기간에 인간의 기본을 잊어버린 당신. 몸이 망가지면 공부도 안 됩니다. 일단 밥부터 드세요. 그다음 물 한 잔. 시험보다 건강이 먼저입니다.",
+    {
+      name: "시험 기간의 성인군자",
+      desc: "결국 세 개를 다 보셨군요! 공부 빼고 세상 모든 게 흥미진진한 상태입니다. 이 정도 정성이면 전공 서적 한 페이지는 외웠겠어요. 성적표는 아프겠지만, 마음만은 풍족한 하루 되시길 바랍니다.",
     },
-  },
+  ],
 };
 
 // 중간 로딩용 웨이포인트 (15초)
@@ -404,8 +400,8 @@ const UNIVERSITIES: string[] = [
   "서울시립대학교",
   "서울여자대학교",
   "성결대학교",
-  "성균관대학교(인문사회과학)",
-  "성균관대학교(자연과학)",
+  "성균관대학교(서울)",
+  "성균관대학교(수원)",
   "성신여자대학교",
   "세종대학교",
   "숙명여자대학교",
@@ -443,7 +439,7 @@ const UNIVERSITIES: string[] = [
   "한성대학교",
   "한신대학교",
   "한양대학교(서울)",
-  "한양대학교(ERICA)",
+  "한양대학교(안산)",
   "홍익대학교(서울)",
   "홍익대학교(세종)",
   "KAIST",
@@ -490,6 +486,7 @@ export default function Home() {
   const currentEntryIdRef = useRef<string | null>(null);
   const resultSavedRef = useRef(false);
   const completedCategoriesRef = useRef<Category[]>([]);
+  const resultVariantRef = useRef<0 | 1>(0);
 
   useEffect(() => {
     const saved = JSON.parse(
@@ -609,15 +606,21 @@ export default function Home() {
   }, [screen, loadingFinal]);
 
   useEffect(() => {
-    if (screen !== "result" || !category) {
+    if (screen !== "result") {
       return;
     }
+    resultVariantRef.current = Math.floor(Math.random() * 2) as 0 | 1;
     if (resultSavedRef.current) {
       return;
     }
     resultSavedRef.current = true;
 
-    const result = getResult();
+    const count = Math.max(
+      1,
+      Math.min(3, completedCategoriesRef.current.length),
+    ) as 1 | 2 | 3;
+    const completionResult =
+      COMPLETION_RESULTS[count][resultVariantRef.current];
     const minutes = toMinutes(elapsed);
     const shortSchool = school.replace("대학교", "대");
 
@@ -628,7 +631,7 @@ export default function Home() {
           school: shortSchool,
           nickname,
           category: completedCategoriesRef.current.map(catLabel).join(" · "),
-          result_type: result.code,
+          result_type: completionResult.name,
           elapsed,
           minutes,
         })
@@ -682,15 +685,12 @@ export default function Home() {
     );
   }
 
-  function getResult() {
-    if (!category) {
-      return RESULTS.love.A;
-    }
-    const cnt: Record<ResultType, number> = { A: 0, B: 0 };
-    answers.forEach((answer) => {
-      cnt[answer] += 1;
-    });
-    return RESULTS[category][cnt.B > cnt.A ? "B" : "A"];
+  function getCompletionResult() {
+    const count = Math.max(1, Math.min(3, completedCategories.length)) as
+      | 1
+      | 2
+      | 3;
+    return COMPLETION_RESULTS[count][resultVariantRef.current];
   }
 
   function goCategory() {
@@ -863,7 +863,7 @@ export default function Home() {
   const questionPct = totalQuestions
     ? (currentNumber / totalQuestions) * 100
     : 0;
-  const result = screen === "result" ? getResult() : null;
+  const result = screen === "result" ? getCompletionResult() : null;
   const minutes = toMinutes(elapsed);
   const remainingCategories = (["love", "study", "life"] as Category[]).filter(
     (cat) => !completedCategories.includes(cat),
@@ -1157,12 +1157,11 @@ export default function Home() {
         </div>
       )}
 
-      {screen === "result" && result && category && (
+      {screen === "result" && result && (
         <>
           <Header subjectHtml={"제 최종 교시&nbsp;&nbsp;&nbsp;결과 발표"} />
           <div className="result-type-box">
-            <div className="result-code">{result.code}</div>
-            <div className="result-name">{result.name}</div>
+            <div className="result-name">[{result.name}]</div>
             <div className="result-desc">{result.desc}</div>
           </div>
           <div className="result-meta-grid">
@@ -1172,7 +1171,7 @@ export default function Home() {
             </div>
             <div className="meta-card">
               <div className="meta-label">학교</div>
-              <div className="meta-value">{school}</div>
+              <div className="meta-value">{school.replace("대학교", "대")}</div>
             </div>
             <div className="meta-card">
               <div className="meta-label">뺏긴 시험시간</div>
@@ -1186,7 +1185,7 @@ export default function Home() {
                 {globalRanking.length > 0 ? (
                   globalRanking.map((entry, index) => (
                     <div
-                      className={`ranking-row ${entry.id === currentEntryIdRef.current ? "rank-me" : ""}`}
+                      className={`ranking-row ${entry.id === currentEntryIdRef.current ? "rank-me" : ""} ${index < 3 ? `rank-top-${index + 1}` : ""}`}
                       key={entry.id}
                     >
                       <span className="rank-num">{index + 1}</span>
@@ -1203,11 +1202,13 @@ export default function Home() {
                 )}
               </div>
               <div className="ranking-col">
-                <div className="ranking-head">🏫 {school} 랭킹 TOP 5</div>
+                <div className="ranking-head">
+                  🏫 {school.replace("대학교", "대")} 랭킹 TOP 5
+                </div>
                 {schoolRanking.length > 0 ? (
                   schoolRanking.map((entry, index) => (
                     <div
-                      className={`ranking-row ${entry.id === currentEntryIdRef.current ? "rank-me" : ""}`}
+                      className={`ranking-row ${entry.id === currentEntryIdRef.current ? "rank-me" : ""} ${index < 3 ? `rank-top-${index + 1}` : ""}`}
                       key={entry.id}
                     >
                       <span className="rank-num">{index + 1}</span>
@@ -1227,7 +1228,7 @@ export default function Home() {
           </div>
           <button
             className="share-btn"
-            onClick={() => void doShare(result.code, minutes)}
+            onClick={() => void doShare(result.name, minutes)}
           >
             📋 결과 공유 문구 복사
           </button>
@@ -1240,7 +1241,9 @@ export default function Home() {
               메인으로
             </button>
           </div>
-          <Footer />
+          <div className="result-copyright">
+            * 이 문제지에 관한 저작권은 시험기간 도파민 테스트에 있습니다.
+          </div>
         </>
       )}
     </main>
