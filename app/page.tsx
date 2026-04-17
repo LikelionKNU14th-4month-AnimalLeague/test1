@@ -49,6 +49,22 @@ const LOADING_MESSAGES = [
   "지금 로딩 바는 디자인입니다. 사실 데이터는 아직 안 왔어요.",
   "지금 핫식스 몇 캔째인가요? 심장 소리가 서버까지 들려요.",
   "방금 '이번 시험은 버릴까'라고 생각하셨죠? 서버가 읽었습니다.",
+  "내 학점은 C지만, 너와의 썸은 A+이고 싶다...",
+  "전공 서적 보다 짝남/여 카톡 대화를 더 많이 읽었는지 확인하는 중입니다.",
+  "다음 중 더 설레는 상황을 고르시오. (1) 종강 (2) 고백",
+  "연애 세포가 시험 범위가 아니라서 다행입니다. (세포 활성도 체크 중...)",
+  "머릿속에 '내용 저장' 버튼이 없어서 '임시저장'만 반복하고 있습니다.",
+  "교수님, 이 부분은 안 나온다면서요....(배신감 게이지 측정 중)",
+  '뇌가 "이 내용은 처음 보는 데이터입니다"라고 응답합니다.',
+  "책장을 넘기는 속도보다 인스타그램 피드 넘기는 속도가 3배 빠릅니다.",
+  "카페인 수혈량이 혈액량을 초과했습니다.",
+  "분명 '10분만 자야지'했는데 눈 뜨니 내일 아침인 상황을 시뮬레이션 중입니다.",
+  "현재 상태 : 씻고 와서 공부하기 vs 안 씻고 그냥 하기",
+  "도파민 수치가 공부할 때 빼고 모든 순간에 폭발하고 있습니다.",
+  "Loading... (이 로딩 바가 당신의 성적표는 아닙니다.)",
+  "광고 보지 마시고 잠시 멍을 때려보세요. 그것이 시험기간의 유일한 휴식입니다.",
+  "서버도 공부하기 싫어서 조금 느립니다. 양해 부탁드려요.",
+  "주의: 테스트 결과가 너무 정확해서 뼈가 맞을 수 있으니 조심하세요.",
 ] as const;
 
 const QUESTIONS: Record<Exclude<Category, "study">, QuizQuestion[]> & {
@@ -322,14 +338,13 @@ function interpPct(
   return 100;
 }
 
-function Header({ num, subjectHtml }: { num: number; subjectHtml: string }) {
+function Header({ subjectHtml }: { subjectHtml: string }) {
   return (
     <>
       <div className="paper-top-bar">
         <span className="paper-meta">
           2026학년도 시험기간 도파민 테스트 문제지
         </span>
-        <span className="paper-big-num">{num}</span>
       </div>
       <hr className="div1" />
       <div className="paper-subject-row">
@@ -438,13 +453,12 @@ const UNIVERSITIES: string[] = [
   "UNIST",
 ];
 
-function Footer({ cur, total }: { cur: number; total?: number }) {
+function Footer() {
   return (
     <div className="paper-footer">
       <span>
         * 이 문제지에 관한 저작권은 시험기간 도파민 테스트에 있습니다.
       </span>
-      <span>{total != null ? `${cur} / ${total}` : `${cur}`}</span>
     </div>
   );
 }
@@ -464,9 +478,7 @@ export default function Home() {
   const [screen, setScreen] = useState<Screen>("intro");
   const [warningCountdown, setWarningCountdown] = useState(5);
   const [loadingPct, setLoadingPct] = useState(0);
-  const [loadingMsg, setLoadingMsg] = useState<
-    (typeof LOADING_MESSAGES)[number]
-  >(LOADING_MESSAGES[0]);
+  const [loadingMsg, setLoadingMsg] = useState<string>(LOADING_MESSAGES[0]);
   const [loadingFinal, setLoadingFinal] = useState(false);
   const [globalRanking, setGlobalRanking] = useState<DbRankingEntry[]>([]);
   const [schoolRanking, setSchoolRanking] = useState<DbRankingEntry[]>([]);
@@ -532,7 +544,11 @@ export default function Home() {
     }
 
     setLoadingPct(0);
-    setLoadingMsg(LOADING_MESSAGES[0]);
+    setLoadingMsg(
+      loadingFinal && completedCategoriesRef.current.length >= 3
+        ? "카테고리 3가지 유형을 전부 하셨다고요? 당신 인정."
+        : LOADING_MESSAGES[0],
+    );
 
     const total = loadingFinal ? 1000 : 1000;
     const waypoints = loadingFinal ? WAYPOINTS_FINAL : WAYPOINTS_MID;
@@ -828,18 +844,6 @@ export default function Home() {
   const questionPct = totalQuestions
     ? (currentNumber / totalQuestions) * 100
     : 0;
-  const totalPages = category === "study" ? 16 : 15;
-  const questionPage =
-    category === "study"
-      ? 3 + currentNumber + (midLoadingDone ? 1 : 0)
-      : 2 + currentNumber + (midLoadingDone ? 1 : 0);
-  const loadingPage = loadingFinal
-    ? category === "study"
-      ? 15
-      : 14
-    : category === "study"
-      ? 9
-      : 8;
   const result = screen === "result" ? getResult() : null;
   const minutes = toMinutes(elapsed);
   const remainingCategories = (["love", "study", "life"] as Category[]).filter(
@@ -850,10 +854,7 @@ export default function Home() {
     <main id="paper">
       {screen === "intro" && (
         <>
-          <Header
-            num={1}
-            subjectHtml={"제 1 교시&nbsp;&nbsp;&nbsp;도파민 영역"}
-          />
+          <Header subjectHtml={"제 1 교시&nbsp;&nbsp;&nbsp;도파민 영역"} />
           <div className="info-box">
             <div className="info-box-title">
               [안내문] 다음을 읽고, 정보를 입력하시오.
@@ -947,16 +948,13 @@ export default function Home() {
           <button className="btn-next" onClick={goCategory}>
             다음 페이지로 →
           </button>
-          <Footer cur={1} />
+          <Footer />
         </>
       )}
 
       {screen === "category" && (
         <>
-          <Header
-            num={2}
-            subjectHtml={"제 2 교시&nbsp;&nbsp;&nbsp;카테고리 선택"}
-          />
+          <Header subjectHtml={"제 2 교시&nbsp;&nbsp;&nbsp;카테고리 선택"} />
           <div className="info-box">
             <div className="info-box-title">
               [안내문] 다음을 읽고, 카테고리를 선택하시오.
@@ -993,13 +991,13 @@ export default function Home() {
               <div className="cat-desc">수면 / 식사 / 루틴</div>
             </button>
           </div>
-          <Footer cur={2} />
+          <Footer />
         </>
       )}
 
       {screen === "studySpecial" && (
         <>
-          <Header num={3} subjectHtml={"도파민 영역"} />
+          <Header subjectHtml={"공부 영역"} />
           <div className="stolen-time">
             ⏱ 지금까지 뺏긴 시간: {fmt(elapsed)}
           </div>
@@ -1026,13 +1024,13 @@ export default function Home() {
               <span>{QUESTIONS.study.special.choices[1]}</span>
             </button>
           </div>
-          <Footer cur={3} total={16} />
+          <Footer />
         </>
       )}
 
       {screen === "question" && currentQuestion && category && (
         <>
-          <Header num={questionPage} subjectHtml={"도파민 영역"} />
+          <Header subjectHtml={`${catLabel(category)} 영역`} />
           <div className="q-meta-row">
             <span>
               {currentNumber} / {totalQuestions} 문항
@@ -1070,7 +1068,7 @@ export default function Home() {
               <span>{currentQuestion.choices[1]}</span>
             </button>
           </div>
-          <Footer cur={questionPage} total={totalPages} />
+          <Footer />
         </>
       )}
 
@@ -1089,7 +1087,7 @@ export default function Home() {
             </div>
             <div className="loading-msg">{loadingMsg}</div>
           </div>
-          <Footer cur={loadingPage} total={totalPages} />
+          <Footer />
         </>
       )}
 
@@ -1142,10 +1140,7 @@ export default function Home() {
 
       {screen === "result" && result && category && (
         <>
-          <Header
-            num={16}
-            subjectHtml={"제 최종 교시&nbsp;&nbsp;&nbsp;결과 발표"}
-          />
+          <Header subjectHtml={"제 최종 교시&nbsp;&nbsp;&nbsp;결과 발표"} />
           <div className="result-type-box">
             <div className="result-code">{result.code}</div>
             <div className="result-name">{result.name}</div>
@@ -1226,7 +1221,7 @@ export default function Home() {
               메인으로
             </button>
           </div>
-          <Footer cur={totalPages} total={totalPages} />
+          <Footer />
         </>
       )}
     </main>
