@@ -547,7 +547,7 @@ export default function Home() {
         : LOADING_MESSAGES[0],
     );
 
-    const total = loadingFinal ? 1000 : 1000;
+    const total = loadingFinal ? 20000 : 15000;
     const waypoints = loadingFinal ? WAYPOINTS_FINAL : WAYPOINTS_MID;
     let elapsedMs = 0;
     let msgIdx = 0;
