@@ -363,7 +363,6 @@ function Header({ subjectHtml }: { subjectHtml: string }) {
           className="paper-subject"
           dangerouslySetInnerHTML={{ __html: subjectHtml }}
         />
-        <span className="paper-badge">홀수형</span>
       </div>
       <hr className="div2" />
     </>
@@ -1026,7 +1025,7 @@ export default function Home() {
 
       {screen === "introRanking" && (
         <>
-          <Header subjectHtml={"명예의 전당"} />
+          <Header subjectHtml={"시험 공부 시간 낭비 명예의 전당"} />
           <div className="ranking-section" style={{ flex: "none" }}>
             <div className="ranking-cols">
               <div className="ranking-col">
@@ -1050,12 +1049,12 @@ export default function Home() {
                   <div className="ranking-empty">아직 기록이 없습니다.</div>
                 )}
               </div>
-              {school && (
-                <div className="ranking-col">
-                  <div className="ranking-head">
-                    🏫 {school.replace("대학교", "대")} 랭킹 TOP 10
-                  </div>
-                  {schoolRanking.length > 0 ? (
+              <div className="ranking-col">
+                <div className="ranking-head">
+                  🏫 {school ? `${school.replace("대학교", "대")} 랭킹 TOP 10` : "학교 미 입력"}
+                </div>
+                {school ? (
+                  schoolRanking.length > 0 ? (
                     schoolRanking.map((entry, index) => (
                       <div
                         className={`ranking-row ${index < 3 ? `rank-top-${index + 1}` : ""}`}
@@ -1072,9 +1071,17 @@ export default function Home() {
                     ))
                   ) : (
                     <div className="ranking-empty">아직 기록이 없습니다.</div>
-                  )}
-                </div>
-              )}
+                  )
+                ) : (
+                  Array.from({ length: 10 }, (_, i) => (
+                    <div className={`ranking-row ${i < 3 ? `rank-top-${i + 1}` : ""}`} key={i}>
+                      <span className="rank-num">{i + 1}</span>
+                      <span className="rank-info" />
+                      <span className="rank-time" />
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", paddingBottom: "16px" }}>
