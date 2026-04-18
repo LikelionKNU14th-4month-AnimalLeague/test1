@@ -38,7 +38,7 @@ const LOADING_MESSAGES = [
   "지금 시간 확인해보셨나요?",
   "방금 전에도 딴짓하셨죠?",
   "이거 끝나고 공부하실 건가요?",
-  "결과보다 과정이 더 재밌으신가요?",
+  "혹시 결과보다 과정이 더 재밌으신가요?",
   "지금 나가셔도 늦지 않았습니다... 나가실래요?",
   "로딩바가 80%까지 갔다가 마음을 바꿨습니다.",
   "곧 끝납니다. 이 말은 세 번째 쓰는 중입니다.",
@@ -49,7 +49,7 @@ const LOADING_MESSAGES = [
   "지금 핫식스 몇 캔째인가요? 심장 소리가 서버까지 들려요.",
   "방금 '이번 시험은 버릴까'라고 생각하셨죠? 서버가 읽었습니다.",
   "내 학점은 C지만, 너와의 썸은 A+이고 싶다...",
-  "전공 서적 보다 짝남/여 카톡 대화를 더 많이 읽었는지 확인하는 중입니다.",
+  "전공 서적 보다 짝(남/녀) 카톡 대화를 더 많이 읽었는지 확인하는 중입니다.",
   "다음 중 더 설레는 상황을 고르시오. (1) 종강 (2) 고백",
   "연애 세포가 시험 범위가 아니라서 다행입니다. (세포 활성도 체크 중...)",
   "머릿속에 '내용 저장' 버튼이 없어서 '임시저장'만 반복하고 있습니다.",
@@ -60,7 +60,7 @@ const LOADING_MESSAGES = [
   "분명 '10분만 자야지'했는데 눈 뜨니 내일 아침인 상황을 시뮬레이션 중입니다.",
   "현재 상태 : 씻고 와서 공부하기 vs 안 씻고 그냥 하기",
   "도파민 수치가 공부할 때 빼고 모든 순간에 폭발하고 있습니다.",
-  "Loading... (이 로딩 바가 당신의 성적표는 아닙니다.)",
+  "Loading... (이 로딩 바는 당신의 성적표는 아닙니다.)",
   "광고 보지 마시고 잠시 멍을 때려보세요. 그것이 시험기간의 유일한 휴식입니다.",
   "서버도 공부하기 싫어서 조금 느립니다. 양해 부탁드려요.",
   "주의: 테스트 결과가 너무 정확해서 뼈가 맞을 수 있으니 조심하세요.",
@@ -273,36 +273,50 @@ const COMPLETION_RESULTS: Record<
   ],
 };
 
-// 중간 로딩용 웨이포인트 (15초)
+// 중간 로딩용 웨이포인트 (21초)
 const WAYPOINTS_MID: ReadonlyArray<readonly [number, number]> = [
   [0, 0],
-  [1688, 38],
-  [3188, 73],
-  [4313, 82],
-  [5063, 24],
-  [6563, 59],
-  [7688, 91],
-  [8625, 34],
-  [10125, 67],
-  [11625, 88],
-  [13125, 95],
-  [15000, 100],
+  [1500, 35],
+  [2800, 68],
+  [3800, 78],
+  [4500, 22],
+  [5800, 55],
+  [7000, 85],
+  [7800, 0],
+  [8800, 0],
+  [10200, 62],
+  [11500, 80],
+  [12500, 45],
+  [14000, 72],
+  [15500, 88],
+  [16500, 40],
+  [18000, 65],
+  [19500, 82],
+  [20300, 55],
+  [21000, 100],
 ];
 
-// 최종 로딩용 웨이포인트 (20초)
+// 최종 로딩용 웨이포인트 (26초)
 const WAYPOINTS_FINAL: ReadonlyArray<readonly [number, number]> = [
   [0, 0],
-  [2250, 38],
-  [4250, 73],
-  [5750, 82],
-  [6750, 24],
-  [8750, 59],
-  [10250, 91],
-  [11500, 34],
-  [13500, 67],
-  [15500, 88],
-  [17500, 95],
-  [20000, 100],
+  [1800, 35],
+  [3500, 65],
+  [5000, 80],
+  [5800, 25],
+  [7500, 58],
+  [9000, 88],
+  [10000, 0],
+  [11000, 0],
+  [12800, 70],
+  [14500, 85],
+  [15500, 42],
+  [17500, 68],
+  [19000, 90],
+  [20000, 50],
+  [22000, 75],
+  [23500, 88],
+  [24500, 55],
+  [26000, 100],
 ];
 
 function fmt(sec: number) {
@@ -552,18 +566,34 @@ export default function Home() {
         : LOADING_MESSAGES[0],
     );
 
-    const total = loadingFinal ? 20000 : 15000;
+    const total = loadingFinal ? 26000 : 21000;
     const waypoints = loadingFinal ? WAYPOINTS_FINAL : WAYPOINTS_MID;
+    const shuffle = (arr: string[]) => {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    };
+
     let elapsedMs = 0;
-    let msgIdx = 0;
+    let shuffled = shuffle([...ELIGIBLE_MESSAGES]);
+    let shuffleIdx = 0;
     let prevPct = 0;
     let reached80 = false;
     let specialShown = false;
+    let zeroShown = false;
 
     const timer = window.setInterval(() => {
       elapsedMs += 100;
       const pct = interpPct(elapsedMs, waypoints);
       setLoadingPct(pct);
+
+      // Show 0% message when bar drops to 0 mid-loading
+      if (!zeroShown && pct === 0 && prevPct > 5) {
+        setLoadingMsg("로딩이 0%네요? 다시 로딩할게요");
+        zeroShown = true;
+      }
 
       // Show the "80% then changed mind" message only if the bar actually reached >=80
       // and then dropped afterwards (waypoint fake-out behavior).
@@ -576,13 +606,13 @@ export default function Home() {
       }
       prevPct = pct;
 
-      if (elapsedMs % 1800 === 0) {
-        let nextIdx;
-        do {
-          nextIdx = Math.floor(Math.random() * ELIGIBLE_MESSAGES.length);
-        } while (nextIdx === msgIdx);
-        msgIdx = nextIdx;
-        setLoadingMsg(ELIGIBLE_MESSAGES[msgIdx] ?? LOADING_MESSAGES[0]);
+      if (elapsedMs % 2500 === 0) {
+        if (shuffleIdx >= shuffled.length) {
+          shuffled = shuffle([...ELIGIBLE_MESSAGES]);
+          shuffleIdx = 0;
+        }
+        setLoadingMsg(shuffled[shuffleIdx]);
+        shuffleIdx++;
       }
 
       if (elapsedMs >= total) {
