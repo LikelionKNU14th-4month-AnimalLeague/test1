@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "시험기간 도파민 테스트",
-  description: "시험기간 도파민 테스트",
+  title: "(주)한국도파민연구소 검사지",
+  description: "(주)한국도파민연구소 검사지",
 };
 
 export default function RootLayout({
