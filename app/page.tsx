@@ -31,7 +31,7 @@ type CompletionResultEntry = {
 
 const LOADING_MESSAGES = [
   "진짜 공부할 생각 있으신가요?",
-  "지금 이 테스트 왜 하고 계신가요?",
+  "지금 검사지 왜 풀고 계신가요?",
   "혹시... 공부하기 싫어서 들어오신 거죠?",
   "이거만 보고 한다 맞죠?",
   "유튜브 끄실 수 있으세요?",
@@ -353,7 +353,7 @@ function Header({ subjectHtml }: { subjectHtml: string }) {
     <>
       <div className="paper-top-bar">
         <span className="paper-meta">
-          2026학년도 시험기간 도파민 테스트 문제지
+          2026학년도 (주)한국도파민연구소 검사지
         </span>
       </div>
       <hr className="div1" />
@@ -466,9 +466,7 @@ const UNIVERSITIES: string[] = [
 function Footer() {
   return (
     <div className="paper-footer">
-      <span>
-        * 이 문제지에 관한 저작권은 시험기간 도파민 테스트에 있습니다.
-      </span>
+      <span>* 이 검사지에 관한 저작권은 (주)한국도파민연구소에 있습니다.</span>
     </div>
   );
 }
@@ -518,7 +516,8 @@ export default function Home() {
       screen !== "question" &&
       screen !== "studySpecial" &&
       screen !== "loading" &&
-      screen !== "nextCategory"
+      screen !== "nextCategory" &&
+      screen !== "warning"
     ) {
       return;
     }
@@ -538,7 +537,7 @@ export default function Home() {
       return;
     }
     if (warningCountdown <= 0) {
-      resetCategoryScreen();
+      resetCategoryScreen({ keepElapsed: true });
       return;
     }
 
@@ -744,11 +743,11 @@ export default function Home() {
     resetCategoryScreen();
   }
 
-  function resetCategoryScreen() {
+  function resetCategoryScreen({ keepElapsed = false }: { keepElapsed?: boolean } = {}) {
     setQuestions([]);
     setQIndex(0);
     setAnswers([]);
-    setElapsed(0);
+    if (!keepElapsed) setElapsed(0);
     setMidLoadingDone(false);
     setCategory(null);
     setStartTime(null);
@@ -775,9 +774,8 @@ export default function Home() {
     );
     setQIndex(0);
     setAnswers([]);
-    setElapsed(0);
     setMidLoadingDone(false);
-    setStartTime(Date.now());
+    setStartTime(Date.now() - elapsed * 1000);
     setAnswerLocked(false);
     setScreen(nextCategory === "study" ? "studySpecial" : "question");
   }
@@ -805,7 +803,6 @@ export default function Home() {
   function handleStudySpecial(choice: SpecialType) {
     if (choice === "exit") {
       setWarningCountdown(5);
-      setStartTime(null);
       setScreen("warning");
       return;
     }
@@ -878,7 +875,7 @@ export default function Home() {
   }
 
   async function doShare(code: string, minutes: number) {
-    const text = `${school} ${nickname}님의 시험시간은 ${minutes}분 뺏겼고, 결과는 ${code}입니다.`;
+    const text = `(주)한국도파민연구소 검사 결과 | ${school} ${nickname}님의 시험시간은 ${minutes}분 뺏겼고, 결과는 ${code}입니다.`;
     try {
       await navigator.clipboard.writeText(text);
       setCopyMsg("공유 문구가 복사됐습니다!");
@@ -909,12 +906,12 @@ export default function Home() {
               [안내문] 다음을 읽고, 정보를 입력하시오.
             </div>
             <div className="info-box-body">
-              시험기간 도파민 테스트에 오신 것을 환영합니다. 본 테스트는
+              (주)한국도파민연구소 검사지에 오신 것을 환영합니다. 본 검사는
               시험기간에 당신의 도파민 중독 수준을 측정하기 위해 설계되었습니다.{" "}
-              <strong>솔직하게</strong> 답변해 주세요. 테스트 결과는 재미를 위한
+              <strong>솔직하게</strong> 답변해 주세요. 검사 결과는 재미를 위한
               것이며, 어떠한 학술적 근거도 없습니다.
               <p className="info-box-warn">
-                ※ 본 테스트를 진행하는 동안 뺏기는 시간은 측정됩니다.
+                ※ 본 검사를 진행하는 동안 뺏기는 시간은 측정됩니다.
               </p>
             </div>
           </div>
@@ -1189,7 +1186,7 @@ export default function Home() {
 
       {screen === "result" && result && (
         <>
-          <Header subjectHtml={"제 최종 교시&nbsp;&nbsp;&nbsp;결과 발표"} />
+          <Header subjectHtml={"최종 결과 발표"} />
           <div className="result-type-box">
             <div className="result-name">[{result.name}]</div>
             <div className="result-desc">{result.desc}</div>
@@ -1272,7 +1269,7 @@ export default function Home() {
             </button>
           </div>
           <div className="result-copyright">
-            * 이 문제지에 관한 저작권은 시험기간 도파민 테스트에 있습니다.
+            * 이 검사지에 관한 저작권은 (주)한국도파민연구소에 있습니다.
           </div>
         </>
       )}
