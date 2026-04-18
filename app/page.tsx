@@ -8,6 +8,7 @@ type ResultType = "A" | "B";
 type SpecialType = "continue" | "exit";
 type Screen =
   | "intro"
+  | "introRanking"
   | "category"
   | "studySpecial"
   | "question"
@@ -49,7 +50,7 @@ const LOADING_MESSAGES = [
   "지금 핫식스 몇 캔째인가요? 심장 소리가 서버까지 들려요.",
   "방금 '이번 시험은 버릴까'라고 생각하셨죠? 서버가 읽었습니다.",
   "내 학점은 C지만, 너와의 썸은 A+이고 싶다...",
-  "전공 서적 보다 짝(남/녀) 카톡 대화를 더 많이 읽었는지 확인하는 중입니다.",
+  "전공 서적 보다 짝남(녀) 카톡 대화를 더 많이 읽었는지 확인하는 중입니다.",
   "다음 중 더 설레는 상황을 고르시오. (1) 종강 (2) 고백",
   "연애 세포가 시험 범위가 아니라서 다행입니다. (세포 활성도 체크 중...)",
   "머릿속에 '내용 저장' 버튼이 없어서 '임시저장'만 반복하고 있습니다.",
@@ -60,7 +61,7 @@ const LOADING_MESSAGES = [
   "분명 '10분만 자야지'했는데 눈 뜨니 내일 아침인 상황을 시뮬레이션 중입니다.",
   "현재 상태 : 씻고 와서 공부하기 vs 안 씻고 그냥 하기",
   "도파민 수치가 공부할 때 빼고 모든 순간에 폭발하고 있습니다.",
-  "Loading... (이 로딩 바는 당신의 성적표는 아닙니다.)",
+  "Loading... (이 로딩 바는 당신의 성적표가 아닙니다.)",
   "광고 보지 마시고 잠시 멍을 때려보세요. 그것이 시험기간의 유일한 휴식입니다.",
   "서버도 공부하기 싫어서 조금 느립니다. 양해 부탁드려요.",
   "주의: 테스트 결과가 너무 정확해서 뼈가 맞을 수 있으니 조심하세요.",
@@ -635,6 +636,22 @@ export default function Home() {
   }, [screen, loadingFinal]);
 
   useEffect(() => {
+    if (screen === "introRanking") {
+      void (async () => {
+        const shortSchool = school.replace("대학교", "대");
+        const [globalRes, schoolRes] = await Promise.all([
+          supabase.from("rankings").select("*").order("elapsed", { ascending: false }).limit(10),
+          school
+            ? supabase.from("rankings").select("*").eq("school", shortSchool).order("elapsed", { ascending: false }).limit(10)
+            : Promise.resolve({ data: [], error: null }),
+        ]);
+        if (globalRes.data) setGlobalRanking(globalRes.data as DbRankingEntry[]);
+        if (schoolRes.data) setSchoolRanking(schoolRes.data as DbRankingEntry[]);
+      })();
+    }
+  }, [screen, school]);
+
+  useEffect(() => {
     if (screen !== "result") {
       return;
     }
@@ -699,6 +716,7 @@ export default function Home() {
     })();
   }, [screen]);
 
+
   useEffect(() => {
     if (!copyMsg) {
       return;
@@ -743,7 +761,9 @@ export default function Home() {
     resetCategoryScreen();
   }
 
-  function resetCategoryScreen({ keepElapsed = false }: { keepElapsed?: boolean } = {}) {
+  function resetCategoryScreen({
+    keepElapsed = false,
+  }: { keepElapsed?: boolean } = {}) {
     setQuestions([]);
     setQIndex(0);
     setAnswers([]);
@@ -991,9 +1011,77 @@ export default function Home() {
               onChange={(e) => setNickname(e.target.value)}
             />
           </div>
-          <button className="btn-next" onClick={goCategory}>
-            다음 페이지로 →
-          </button>
+
+          <div style={{ marginTop: "20px" }}>
+            <button className="btn-ranking" onClick={() => setScreen("introRanking")}>
+              🏆 랭킹 보러 가기
+            </button>
+            <button className="btn-next" onClick={goCategory}>
+              검사 시작하러 가기 →
+            </button>
+          </div>
+          <Footer />
+        </>
+      )}
+
+      {screen === "introRanking" && (
+        <>
+          <Header subjectHtml={"명예의 전당"} />
+          <div className="ranking-section" style={{ flex: "none" }}>
+            <div className="ranking-cols">
+              <div className="ranking-col">
+                <div className="ranking-head">🌍 전체 랭킹 TOP 10</div>
+                {globalRanking.length > 0 ? (
+                  globalRanking.map((entry, index) => (
+                    <div
+                      className={`ranking-row ${index < 3 ? `rank-top-${index + 1}` : ""}`}
+                      key={entry.id}
+                    >
+                      <span className="rank-num">{index + 1}</span>
+                      <span className="rank-info">
+                        <span>{entry.nickname}</span>
+                        <span className="rank-school">({entry.school})</span>
+                        <span className="rank-category">{entry.category}</span>
+                      </span>
+                      <span className="rank-time">{fmt(entry.elapsed)}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="ranking-empty">아직 기록이 없습니다.</div>
+                )}
+              </div>
+              {school && (
+                <div className="ranking-col">
+                  <div className="ranking-head">
+                    🏫 {school.replace("대학교", "대")} 랭킹 TOP 10
+                  </div>
+                  {schoolRanking.length > 0 ? (
+                    schoolRanking.map((entry, index) => (
+                      <div
+                        className={`ranking-row ${index < 3 ? `rank-top-${index + 1}` : ""}`}
+                        key={entry.id}
+                      >
+                        <span className="rank-num">{index + 1}</span>
+                        <span className="rank-info">
+                          <span>{entry.nickname}</span>
+                          <span className="rank-school">({entry.school})</span>
+                          <span className="rank-category">{entry.category}</span>
+                        </span>
+                        <span className="rank-time">{fmt(entry.elapsed)}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="ranking-empty">아직 기록이 없습니다.</div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", paddingBottom: "16px" }}>
+            <button className="btn-next" style={{ margin: 0 }} onClick={() => setScreen("intro")}>
+              ← 돌아가기
+            </button>
+          </div>
           <Footer />
         </>
       )}
